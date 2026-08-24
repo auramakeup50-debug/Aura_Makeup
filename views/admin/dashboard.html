@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Panel admin | Aura Makeup</title>
+	<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+	<header class="admin-header">
+		<a class="admin-brand" href="/admin/dashboard.html">Aura Makeup</a>
+		<nav class="admin-nav" aria-label="Navegación administrativa">
+			<a href="/admin/usuarios.html">Usuarios</a>
+			<a href="/admin/productos.html">Productos</a>
+			<a href="/admin/pedidos.html">Pedidos</a>
+			<a class="admin-logout" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+
+	<main class="admin-content">
+		<section class="admin-intro">
+			<p class="admin-kicker">Panel de administración</p>
+			<h1>Bienvenida, administradora.</h1>
+			<p>Gestiona el catálogo, supervisa los pedidos y mantén Aura Makeup en orden.</p>
+		</section>
+
+		<section class="admin-section" aria-labelledby="resumen-title">
+			<h2 id="resumen-title">Resumen de la tienda</h2>
+			<div class="admin-stats">
+				<div class="admin-stat">
+					<strong>0</strong>
+					<span>Productos registrados</span>
+				</div>
+				<div class="admin-stat">
+					<strong>0</strong>
+					<span>Pedidos pendientes</span>
+				</div>
+				<div class="admin-stat">
+					<strong>0</strong>
+					<span>Usuarios registrados</span>
+				</div>
+			</div>
+		</section>
+
+		<section class="admin-section" aria-labelledby="gestion-title">
+			<h2 id="gestion-title">Gestión rápida</h2>
+			<div class="admin-actions">
+				<a class="admin-action" href="/admin/productos.html">
+					<strong>Gestionar productos</strong>
+					<span>Agrega y organiza el catálogo.</span>
+				</a>
+				<a class="admin-action" href="/admin/pedidos.html">
+					<strong>Revisar pedidos</strong>
+					<span>Consulta y actualiza las compras.</span>
+				</a>
+				<a class="admin-action" href="/admin/usuarios.html">
+					<strong>Gestionar usuarios</strong>
+					<span>Revisa las cuentas registradas.</span>
+				</a>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+		if (!localStorage.getItem('token') || !usuario || usuario.rol !== 'admin') {
+			window.location.replace('/login');
+		}
+
+		document.getElementById('cerrarSesion').addEventListener('click', () => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('usuario');
+		});
+	</script>
+</body>
+</html>

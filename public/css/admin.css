@@ -1,0 +1,171 @@
+:root {
+	color-scheme: light;
+	font-family: Georgia, 'Times New Roman', serif;
+	--vino: #783f3d;
+	--vino-oscuro: #5f302f;
+	--rosa: #f9e8e6;
+	--texto: #5d4a48;
+	--borde: #e8c9c5;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background: #fffaf8;
+	color: var(--texto);
+	margin: 0;
+	min-height: 100vh;
+}
+
+.admin-header {
+	align-items: center;
+	background: var(--vino-oscuro);
+	color: #ffffff;
+	display: flex;
+	justify-content: space-between;
+	padding: 18px clamp(20px, 6vw, 76px);
+}
+
+.admin-brand {
+	color: #ffffff;
+	font-size: 1.45rem;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.admin-nav {
+	align-items: center;
+	display: flex;
+	gap: 22px;
+}
+
+.admin-nav a {
+	color: #fff4f2;
+	font-size: 0.93rem;
+	text-decoration: none;
+}
+
+.admin-nav a:hover {
+	color: #ffffff;
+	text-decoration: underline;
+}
+
+.admin-logout {
+	border: 1px solid rgba(255, 255, 255, 0.65);
+	border-radius: 5px;
+	padding: 8px 13px;
+}
+
+.admin-content {
+	margin: 0 auto;
+	max-width: 1180px;
+	padding: clamp(42px, 7vw, 76px) 24px 60px;
+}
+
+.admin-kicker {
+	color: var(--vino);
+	font-size: 0.78rem;
+	font-weight: bold;
+	letter-spacing: 0.12em;
+	margin: 0 0 12px;
+	text-transform: uppercase;
+}
+
+.admin-intro {
+	border-bottom: 1px solid var(--borde);
+	padding-bottom: 36px;
+}
+
+.admin-intro h1 {
+	color: var(--vino-oscuro);
+	font-size: clamp(2.2rem, 5vw, 4rem);
+	font-weight: normal;
+	line-height: 1.08;
+	margin: 0;
+}
+
+.admin-intro p:last-child {
+	font-size: 1.05rem;
+	line-height: 1.6;
+	margin: 16px 0 0;
+	max-width: 600px;
+}
+
+.admin-section {
+	padding-top: 34px;
+}
+
+.admin-section h2 {
+	color: var(--vino-oscuro);
+	font-size: 1.4rem;
+	font-weight: normal;
+	margin: 0 0 18px;
+}
+
+.admin-stats,
+.admin-actions {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-stat,
+.admin-action {
+	background: #ffffff;
+	border: 1px solid var(--borde);
+	border-radius: 7px;
+	padding: 22px;
+}
+
+.admin-stat strong {
+	color: var(--vino);
+	display: block;
+	font-size: 2rem;
+	font-weight: normal;
+	margin-bottom: 5px;
+}
+
+.admin-stat span,
+.admin-action span {
+	color: #876967;
+	font-size: 0.9rem;
+}
+
+.admin-action {
+	color: var(--vino-oscuro);
+	min-height: 125px;
+	text-decoration: none;
+	transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.admin-action:hover {
+	background: var(--rosa);
+	border-color: var(--vino);
+	transform: translateY(-3px);
+}
+
+.admin-action strong {
+	display: block;
+	font-size: 1.08rem;
+	margin-bottom: 10px;
+}
+
+@media (max-width: 700px) {
+	.admin-header {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.admin-nav {
+		flex-wrap: wrap;
+		gap: 12px 18px;
+	}
+
+	.admin-stats,
+	.admin-actions {
+		grid-template-columns: 1fr;
+	}
+}

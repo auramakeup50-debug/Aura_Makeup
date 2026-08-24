@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Iniciar sesión | Aura Makeup</title>
+	<link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="pagina-auth">
+	<main class="auth-card">
+		<h1 class="auth-brand">Aura Makeup</h1>
+		<p class="auth-subtitle">Vuelve a tu espacio de belleza.</p>
+
+		<form class="auth-form" id="formLogin">
+			<div class="auth-field">
+				<label for="correo">Correo electrónico</label>
+				<input type="email" id="correo" name="correo" autocomplete="email" required>
+			</div>
+
+			<div class="auth-field">
+				<label for="password">Contraseña</label>
+				<input type="password" id="password" name="password" autocomplete="current-password" required>
+			</div>
+
+			<button class="auth-button" type="submit">Iniciar sesión</button>
+		</form>
+
+		<p class="auth-message" id="mensaje" aria-live="polite"></p>
+		<p class="auth-switch">¿No tienes una cuenta? <a href="/registro">Regístrate</a></p>
+	</main>
+	<script>
+		const formulario = document.getElementById('formLogin');
+		const mensaje = document.getElementById('mensaje');
+
+		formulario.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			mensaje.textContent = '';
+
+			try {
+				const respuesta = await fetch('/api/auth/login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						correo: document.getElementById('correo').value,
+						password: document.getElementById('password').value
+					})
+				});
+				const datos = await respuesta.json();
+
+				if (!respuesta.ok) {
+					mensaje.textContent = datos.mensaje;
+					return;
+				}
+
+				localStorage.setItem('token', datos.token);
+				localStorage.setItem('usuario', JSON.stringify(datos.usuario));
+				window.location.href = datos.usuario.rol === 'admin'
+					? '/admin/dashboard.html'
+					: '/usuario/inicio.html';
+			} catch (error) {
+				mensaje.textContent = 'No se pudo conectar con el servidor';
+			}
+		});
+	</script>
+</body>
+</html>

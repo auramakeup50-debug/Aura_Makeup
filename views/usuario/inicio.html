@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mi espacio | Aura Makeup</title>
+	<link rel="stylesheet" href="/css/usuario.css">
+</head>
+<body>
+	<header class="usuario-header">
+		<a class="marca" href="/usuario/inicio.html">Aura Makeup</a>
+		<nav class="usuario-nav" aria-label="Navegación principal">
+			<a href="/usuario/perfil.html">Mi perfil</a>
+			<a href="/usuario/historial.html">Mis pedidos</a>
+			<a class="boton-salir" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+
+	<main class="usuario-contenido">
+		<section class="usuario-hero">
+			<p class="usuario-etiqueta">Tu espacio personal</p>
+			<h1>Bienvenido, <span id="nombreUsuario">a tu espacio</span>.</h1>
+			<p>Explora tus productos favoritos, revisa tus pedidos y mantén tu rutina de maquillaje siempre a tu alcance.</p>
+		</section>
+
+		<section class="usuario-seccion" aria-labelledby="accesos-title">
+			<h2 id="accesos-title">Accesos rápidos</h2>
+			<div class="usuario-opciones">
+				<a class="opcion" href="/productos">
+					<strong>Productos</strong>
+					<span>Encuentra nuevos favoritos para tu colección.</span>
+				</a>
+				<a class="opcion" href="/usuario/carrito.html">
+					<strong>Mi carrito</strong>
+					<span>Revisa tus productos antes de comprar.</span>
+				</a>
+				<a class="opcion" href="/usuario/historial.html">
+					<strong>Historial</strong>
+					<span>Consulta el estado de tus pedidos anteriores.</span>
+				</a>
+				<a class="opcion" href="/usuario/perfil.html">
+					<strong>Mi perfil</strong>
+					<span>Administra tus datos y preferencias.</span>
+				</a>
+			</div>
+		</section>
+	</main>
+
+	<script>
+		if (!localStorage.getItem('token')) {
+			window.location.replace('/login');
+		}
+
+		const usuarioGuardado = localStorage.getItem('usuario');
+		if (usuarioGuardado) {
+			try {
+				const usuario = JSON.parse(usuarioGuardado);
+				document.getElementById('nombreUsuario').textContent = usuario.nombre || 'a tu espacio';
+			} catch (error) {
+				localStorage.removeItem('usuario');
+			}
+		}
+
+		document.getElementById('cerrarSesion').addEventListener('click', () => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('usuario');
+		});
+	</script>
+</body>
+</html>

@@ -7,55 +7,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Registro | Aura Makeup</title>
-
-    <!-- <link rel="stylesheet" href="../public/css/style.css"> -->
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
-<body>
+<body class="pagina-auth">
 
-    <h1>Aura Makeup</h1>
+    <main class="auth-card">
+        <h1 class="auth-brand">Aura Makeup</h1>
 
-    <h2>Crear cuenta</h2>
+        <p class="auth-subtitle">Crea tu cuenta y descubre tu estilo.</p>
 
-    <form id="formRegistro">
+        <form class="auth-form" id="formRegistro">
 
-        <label for="nombre">Nombre</label>
-        <input
-            type="text"
-            id="nombre"
-            name="nombre"
-            required
-        >
+            <div class="auth-field">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+            </div>
 
-        <br><br>
+            <div class="auth-field">
+                <label for="correo">Correo electrónico</label>
+                <input type="email" id="correo" name="correo" autocomplete="email" required>
+            </div>
 
-        <label for="correo">Correo electrónico</label>
-        <input
-            type="email"
-            id="correo"
-            name="correo"
-            required
-        >
+            <div class="auth-field">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" autocomplete="new-password" required>
+            </div>
 
-        <br><br>
+            <button class="auth-button" type="submit">Registrarme</button>
+        </form>
 
-        <label for="password">Contraseña</label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            required
-        >
+        <p class="auth-message" id="mensaje" aria-live="polite"></p>
+        <p class="auth-switch">¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a></p>
+    </main>
 
-        <br><br>
-
-        <button type="submit">
-            Registrarme
-        </button>
-
-    </form>
-
-    <p id="mensaje"></p>
 
 
     <script>

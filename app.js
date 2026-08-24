@@ -33,6 +33,18 @@ app.get('/login', (req, res) => {
 });
 
 
+// Página inicial del usuario
+app.get('/usuario/inicio.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'usuario', 'inicio.html'));
+});
+
+
+// Panel inicial del administrador
+app.get('/admin/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'admin', 'dashboard.html'));
+});
+
+
 // Rutas de autenticación
 app.use('/api/auth', require('./routes/authRoutes'));
 
