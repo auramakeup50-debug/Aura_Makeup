@@ -33,20 +33,34 @@ app.get('/login', (req, res) => {
 });
 
 
-// Página inicial del usuario
-app.get('/usuario/inicio.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'usuario', 'inicio.html'));
-});
-
-
 // Panel inicial del administrador
 app.get('/admin/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin', 'dashboard.html'));
 });
 
 
+// Páginas del usuario
+app.get('/usuario/inicio.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'usuario', 'inicio.html'));
+});
+
+app.get('/usuario/perfil.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'usuario', 'perfil.html'));
+});
+
+app.get('/usuario/historial.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'usuario', 'historial.html'));
+});
+
+app.get('/usuario/carrito.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'usuario', 'carrito.html'));
+});
+
+
 // Rutas de autenticación
 app.use('/api/auth', require('./routes/authRoutes'));
+
+app.use('/api/usuario', require('./routes/usuarioRoutes'));
 
 
 // Iniciar servidor

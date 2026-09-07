@@ -14,6 +14,18 @@ const Usuario = {
         return db.prepare(sql).get(correo);
     },
 
+    // Buscar usuario por ID
+    buscarPorId: (id) => {
+
+        const sql = `
+            SELECT id, nombre, correo, rol, fecha_registro
+            FROM usuarios
+            WHERE id = ?
+        `;
+
+        return db.prepare(sql).get(id);
+    },
+
     // Crear usuario
     crear: (nombre, correo, password) => {
 
@@ -26,6 +38,20 @@ const Usuario = {
         return db
             .prepare(sql)
             .run(nombre, correo, password);
+    },
+
+    // Actualizar perfil
+    actualizar: (id, nombre, correo) => {
+
+        const sql = `
+            UPDATE usuarios
+            SET nombre = ?, correo = ?
+            WHERE id = ?
+        `;
+
+        return db
+            .prepare(sql)
+            .run(nombre, correo, id);
     }
 
 };
