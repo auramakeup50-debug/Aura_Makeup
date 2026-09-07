@@ -7,26 +7,48 @@
 	<link rel="stylesheet" href="/css/auth.css">
 </head>
 <body class="pagina-auth">
-	<main class="auth-card">
-		<h1 class="auth-brand">Aura Makeup</h1>
-		<p class="auth-subtitle">Vuelve a tu espacio de belleza.</p>
-
-		<form class="auth-form" id="formLogin">
-			<div class="auth-field">
-				<label for="correo">Correo electrónico</label>
-				<input type="email" id="correo" name="correo" autocomplete="email" required>
+	<main class="auth-shell">
+		<section class="auth-visual" aria-label="Promoción de Aura Makeup">
+			<div class="visual-content">
+				<p class="eyebrow">Aura Makeup</p>
+				<h1>Tu belleza, <span>en cada detalle.</span></h1>
+				<p>Descubre productos pensados para resaltar tu brillo natural con tonos cálidos, luminosos y elegantes.</p>
 			</div>
+		</section>
 
-			<div class="auth-field">
-				<label for="password">Contraseña</label>
-				<input type="password" id="password" name="password" autocomplete="current-password" required>
+		<section class="auth-panel">
+			<div class="auth-card">
+				<div class="auth-brand-row">
+					<div class="brand-mark">A</div>
+					<div class="brand-copy">
+						<h2>Aura Makeup</h2>
+						<p>Cuida tu ritual</p>
+					</div>
+				</div>
+
+				<div class="auth-head">
+					<p class="auth-tag">Bienvenida de vuelta</p>
+					<h1>Inicia sesión</h1>
+				</div>
+
+				<form class="auth-form" id="formLogin">
+					<div class="auth-field">
+						<label for="correo">Correo electrónico</label>
+						<input type="email" id="correo" name="correo" autocomplete="email" required>
+					</div>
+
+					<div class="auth-field">
+						<label for="password">Contraseña</label>
+						<input type="password" id="password" name="password" autocomplete="current-password" required>
+					</div>
+
+					<button class="auth-button" type="submit">Iniciar sesión</button>
+				</form>
+
+				<p class="auth-message" id="mensaje" aria-live="polite"></p>
+				<p class="auth-switch">¿No tienes una cuenta? <a href="/registro">Crear una cuenta</a></p>
 			</div>
-
-			<button class="auth-button" type="submit">Iniciar sesión</button>
-		</form>
-
-		<p class="auth-message" id="mensaje" aria-live="polite"></p>
-		<p class="auth-switch">¿No tienes una cuenta? <a href="/registro">Regístrate</a></p>
+		</section>
 	</main>
 	<script>
 		const formulario = document.getElementById('formLogin');
