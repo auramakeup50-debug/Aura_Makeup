@@ -4,255 +4,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Mi perfil | Aura Makeup</title>
-
     <link rel="stylesheet" href="/css/usuario.css">
 </head>
 
 <body>
-
     <header class="usuario-header">
-
-        <a class="marca" href="/usuario/inicio.html">
-            Aura Makeup
-        </a>
-
+        <a class="marca" href="/usuario/inicio.html">Aura Makeup</a>
         <nav class="usuario-nav">
-
-            <a href="/usuario/inicio.html">
-                Inicio
-            </a>
-
-            <a href="/usuario/historial.html">
-                Mis pedidos
-            </a>
-
-            <a href="/usuario/carrito.html">
-                Mi carrito
-            </a>
-
-            <a href="/login" id="cerrarSesion">
-                Cerrar sesión
-            </a>
-
+            <a href="/usuario/inicio.html">Inicio</a>
+            <a href="/usuario/historial.html">Mis pedidos</a>
+            <a href="/usuario/carrito.html">Mi carrito</a>
+            <a href="/login" id="cerrarSesion">Cerrar sesión</a>
         </nav>
-
     </header>
 
-
     <main class="usuario-contenido">
-
         <section class="usuario-hero">
-
-            <p class="usuario-etiqueta">
-                Mi cuenta
-            </p>
-
-            <h1>Mi perfil</h1>
-
-            <p>
-                Consulta y actualiza tus datos personales.
-            </p>
-
+            <p class="usuario-etiqueta">Mi cuenta</p>
+            <div class="hero-contenido">
+                <div>
+                    <h1>Mi perfil</h1>
+                    <p>Tu espacio personal para mantener tus datos al día y disfrutar una experiencia hecha para ti.</p>
+                </div>
+                <div class="hero-sello" aria-hidden="true">
+                    <span>A</span>
+                    <small>Aura member</small>
+                </div>
+            </div>
         </section>
 
+        <section class="perfil-layout">
+            <aside class="perfil-resumen">
+                <div class="avatar" aria-hidden="true">A</div>
+                <p class="resumen-etiqueta">Cuenta Aura</p>
+                <h2>Tu belleza, tu esencia</h2>
+                <p class="resumen-texto">Actualiza tu información para que podamos acompañarte mejor en cada pedido.</p>
+                <div class="resumen-linea"></div>
+                <div class="resumen-meta">
+                    <span>Estado de cuenta</span>
+                    <strong><i></i> Activa</strong>
+                </div>
+            </aside>
 
-        <section class="usuario-seccion">
-
-            <form id="formPerfil">
-
-                <div>
-
-                    <label for="nombre">
-                        Nombre
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nombre"
-                        required
-                    >
-
+            <div class="usuario-seccion perfil-formulario">
+                <div class="seccion-cabecera">
+                    <div>
+                        <p class="usuario-etiqueta">Información personal</p>
+                        <h2>Detalles de tu cuenta</h2>
+                    </div>
+                    <span class="candado" aria-label="Datos protegidos">&#9671;</span>
                 </div>
 
+                <form id="formPerfil">
+                    <div class="campo">
+                        <label for="nombre">Nombre completo</label>
+                        <input type="text" id="nombre" placeholder="Escribe tu nombre" required>
+                        <small>Así aparecerá en tus pedidos.</small>
+                    </div>
 
-                <br>
+                    <div class="campo">
+                        <label for="correo">Correo electrónico</label>
+                        <input type="email" id="correo" placeholder="tu correo electrónico" required>
+                        <small>Usaremos este correo para mantenerte al tanto.</small>
+                    </div>
 
-
-                <div>
-
-                    <label for="correo">
-                        Correo electrónico
-                    </label>
-
-                    <input
-                        type="email"
-                        id="correo"
-                        required
-                    >
-
-                </div>
-
-
-                <br>
-
-
-                <button type="submit">
-                    Guardar cambios
-                </button>
-
-            </form>
-
-
-            <p id="mensaje"></p>
-
+                    <div class="form-footer">
+                        <span>Última actualización: ahora</span>
+                        <button type="submit">Guardar cambios <span aria-hidden="true">&#8594;</span></button>
+                    </div>
+                </form>
+                <p id="mensaje" role="status"></p>
+            </div>
         </section>
-
     </main>
 
-
     <script>
-
         const token = localStorage.getItem('token');
 
-        // Comprobar si inició sesión
         if (!token) {
-
             window.location.replace('/login');
-
         }
 
-
-        // Cargar perfil
         async function cargarPerfil() {
-
             try {
-
-                const respuesta = await fetch(
-                    '/api/usuario/perfil',
-                    {
-                        method: 'GET',
-
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }
-                );
-
+                const respuesta = await fetch('/api/usuario/perfil', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
                 const datos = await respuesta.json();
 
-
                 if (!respuesta.ok) {
-
                     localStorage.removeItem('token');
                     localStorage.removeItem('usuario');
-
                     window.location.replace('/login');
-
                     return;
-
                 }
 
-
-                document.getElementById('nombre').value =
-                    datos.usuario.nombre;
-
-                document.getElementById('correo').value =
-                    datos.usuario.correo;
-
-
+                document.getElementById('nombre').value = datos.usuario.nombre;
+                document.getElementById('correo').value = datos.usuario.correo;
             } catch (error) {
-
                 console.error(error);
-
-                document.getElementById('mensaje').textContent =
-                    'No se pudo cargar el perfil.';
-
+                document.getElementById('mensaje').textContent = 'No se pudo cargar el perfil.';
             }
-
         }
 
+        document.getElementById('formPerfil').addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-        // Actualizar perfil
-        document.getElementById('formPerfil')
-            .addEventListener('submit', async (event) => {
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
 
-                event.preventDefault();
+            try {
+                const respuesta = await fetch('/api/usuario/perfil', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nombre, correo })
+                });
 
+                const datos = await respuesta.json();
+                document.getElementById('mensaje').textContent = datos.mensaje;
 
-                const nombre =
-                    document.getElementById('nombre').value;
-
-                const correo =
-                    document.getElementById('correo').value;
-
-
-                try {
-
-                    const respuesta = await fetch(
-                        '/api/usuario/perfil',
-                        {
-                            method: 'PUT',
-
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-
-                            body: JSON.stringify({
-                                nombre,
-                                correo
-                            })
-                        }
-                    );
-
-
-                    const datos = await respuesta.json();
-
-
-                    document.getElementById('mensaje')
-                        .textContent = datos.mensaje;
-
-
-                    if (respuesta.ok) {
-
-                        localStorage.setItem(
-                            'usuario',
-                            JSON.stringify(datos.usuario)
-                        );
-
-                    }
-
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    document.getElementById('mensaje').textContent =
-                        'No se pudo actualizar el perfil.';
-
+                if (respuesta.ok) {
+                    localStorage.setItem('usuario', JSON.stringify(datos.usuario));
                 }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('mensaje').textContent = 'No se pudo actualizar el perfil.';
+            }
+        });
 
-            });
+        document.getElementById('cerrarSesion').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+        });
 
-
-        // Cerrar sesión
-        document.getElementById('cerrarSesion')
-            .addEventListener('click', () => {
-
-                localStorage.removeItem('token');
-                localStorage.removeItem('usuario');
-
-            });
-
-
-        // Ejecutar al abrir la página
         cargarPerfil();
-
     </script>
-
 </body>
 
 </html>
