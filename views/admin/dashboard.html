@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Panel admin | Aura Makeup</title>
 	<link rel="stylesheet" href="/css/admin.css">
 </head>
+
 <body>
 	<header class="admin-header">
 		<a class="admin-brand" href="/admin/dashboard.html">Aura Makeup</a>
@@ -36,7 +38,7 @@
 					<span>Pedidos pendientes</span>
 				</div>
 				<div class="admin-stat">
-					<strong>0</strong>
+					<strong id="totalUsuarios">0</strong>
 					<span>Usuarios registrados</span>
 				</div>
 			</div>
@@ -62,15 +64,119 @@
 	</main>
 
 	<script>
-		const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
-		if (!localStorage.getItem('token') || !usuario || usuario.rol !== 'admin') {
+
+		// =====================================
+		// COMPROBAR SESIÓN DEL ADMINISTRADOR
+		// =====================================
+
+		const usuario = JSON.parse(
+			localStorage.getItem('usuario') || 'null'
+		);
+
+		const token = localStorage.getItem('token');
+
+		if (!token || !usuario || usuario.rol !== 'admin') {
+
 			window.location.replace('/login');
+
 		}
 
-		document.getElementById('cerrarSesion').addEventListener('click', () => {
-			localStorage.removeItem('token');
-			localStorage.removeItem('usuario');
-		});
+
+		// =====================================
+		// CARGAR TOTAL DE USUARIOS
+		// =====================================
+
+		async function cargarTotalUsuarios() {
+
+			const totalUsuarios =
+				document.getElementById('totalUsuarios');
+
+			try {
+
+				const respuesta = await fetch(
+					'/api/admin/usuarios',
+					{
+						method: 'GET',
+
+						headers: {
+							'Authorization': `Bearer ${token}`
+						}
+					}
+				);
+
+
+				const datos = await respuesta.json();
+
+
+				// Si el token ya no es válido
+				if (respuesta.status === 401) {
+
+					localStorage.removeItem('token');
+					localStorage.removeItem('usuario');
+
+					window.location.replace('/login');
+
+					return;
+				}
+
+
+				// Si no tiene permisos
+				if (respuesta.status === 403) {
+
+					totalUsuarios.textContent = '0';
+
+					return;
+				}
+
+
+				if (!respuesta.ok) {
+
+					throw new Error(
+						datos.mensaje ||
+						'Error al obtener usuarios'
+					);
+
+				}
+
+
+				// =====================================
+				// MOSTRAR CANTIDAD
+				// =====================================
+
+				totalUsuarios.textContent = datos.length;
+
+			} catch (error) {
+
+				console.error(
+					'Error al cargar usuarios:',
+					error
+				);
+
+				totalUsuarios.textContent = '0';
+
+			}
+
+		}
+
+
+		// Ejecutar al cargar el dashboard
+		cargarTotalUsuarios();
+
+
+		// =====================================
+		// CERRAR SESIÓN
+		// =====================================
+
+		document
+			.getElementById('cerrarSesion')
+			.addEventListener('click', () => {
+
+				localStorage.removeItem('token');
+				localStorage.removeItem('usuario');
+
+			});
+
 	</script>
 </body>
+
 </html>
