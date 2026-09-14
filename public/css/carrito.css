@@ -59,5 +59,32 @@ body { background: radial-gradient(circle at 90% 4%, rgba(217,155,165,.25), tran
 .confirmacion { background: #f8e6df; border: 1px solid #dbad9b; color: var(--vino-oscuro); margin-top: 22px; padding: 18px; }
 .confirmacion[hidden] { display: none; }
 .confirmacion strong { display: block; margin-bottom: 5px; }
+.pago-abierto { overflow: hidden; }
+.pago-modal[hidden] { display: none; }
+.pago-modal { align-items: center; display: flex; inset: 0; justify-content: center; padding: 18px; position: fixed; z-index: 20; }
+.pago-fondo { background: rgba(54,35,45,.62); inset: 0; position: absolute; }
+.pago-contenido { background: var(--rosa-claro); box-shadow: 0 24px 70px rgba(54,35,45,.28); max-height: calc(100vh - 36px); max-width: 680px; overflow-y: auto; padding: clamp(24px,5vw,42px); position: relative; width: 100%; }
+.pago-cerrar { background: #fffaf7; border: 1px solid var(--borde); border-radius: 50%; color: var(--vino); cursor: pointer; font-size: 1.5rem; height: 36px; line-height: 1; position: absolute; right: 18px; top: 18px; width: 36px; }
+.pago-cabecera { border-bottom: 1px solid var(--borde); padding-right: 42px; padding-bottom: 20px; }
+.pago-cabecera h2 { color: var(--vino-oscuro); font-family: Georgia, serif; font-size: clamp(1.7rem,4vw,2.5rem); font-weight: normal; margin: 0; }
+.pago-cabecera p:last-child { color: #896f69; font-size: .88rem; line-height: 1.5; margin: 10px 0 0; }
+.metodos-pago { border: 0; display: grid; gap: 9px; margin: 22px 0 0; padding: 0; }
+.metodos-pago legend, .datos-entrega h3 { color: var(--vino-oscuro); font-family: Georgia, serif; font-size: 1.08rem; margin-bottom: 11px; }
+.metodo-pago { align-items: center; background: #fffaf7; border: 1px solid var(--borde); cursor: pointer; display: flex; gap: 12px; padding: 12px 14px; }
+.metodo-pago:has(input:checked) { background: var(--rosa); border-color: var(--terracota); }
+.metodo-pago input { accent-color: var(--vino); }
+.metodo-pago span { display: flex; flex-direction: column; gap: 3px; }
+.metodo-pago strong { color: var(--vino-oscuro); font-size: .87rem; }
+.metodo-pago small { color: #896f69; font-size: .72rem; }
+.datos-entrega { border-top: 1px solid var(--borde); margin-top: 24px; padding-top: 22px; }
+.campos-pago, .datos-metodo, .campos-tarjeta { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+.campos-pago label:first-child, .campos-pago label:nth-child(2), .datos-metodo label:first-child { grid-column: span 2; }
+.campos-pago label, .datos-metodo label { color: var(--vino-oscuro); display: grid; font-size: .78rem; font-weight: 700; gap: 6px; }
+.campos-pago input, .datos-metodo input, .datos-metodo select { background: #fff; border: 1px solid var(--borde); color: var(--texto); font: inherit; font-weight: 400; padding: 11px; width: 100%; }
+.nota-metodo { background: #f8e6df; color: #75584f; font-size: .8rem; line-height: 1.5; margin: 0; padding: 12px; }
+.error-pago { color: #a44755; font-size: .8rem; min-height: 18px; }
+.boton-enviar { background: var(--vino); border: 0; color: #fff; cursor: pointer; font: inherit; padding: 13px; width: 100%; }
+.boton-enviar:hover { background: var(--vino-oscuro); }
 @media (max-width: 800px) { .carrito-layout { grid-template-columns: 1fr; } .resumen-compra { position: static; } }
 @media (max-width: 600px) { .carrito-header { align-items: flex-start; flex-direction: column; gap: 15px; } .carrito-nav { flex-wrap: wrap; gap: 11px 16px; } .item-carrito { grid-template-columns: 70px minmax(0,1fr); padding: 16px; } .item-imagen { height: 70px; width: 70px; } .item-precio { grid-column: 2; } .item-controles { grid-column: 2; justify-self: start; } .item-eliminar { grid-column: 2; justify-self: start; } }
+@media (max-width: 520px) { .campos-pago, .datos-metodo, .campos-tarjeta { grid-template-columns: 1fr; } .campos-pago label:first-child, .campos-pago label:nth-child(2), .datos-metodo label:first-child { grid-column: auto; } }

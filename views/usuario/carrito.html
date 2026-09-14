@@ -47,6 +47,37 @@
 		</div>
 	</main>
 
+	<div class="pago-modal" id="pagoModal" hidden>
+		<div class="pago-fondo" data-cerrar-pago></div>
+		<section class="pago-contenido" role="dialog" aria-modal="true" aria-labelledby="pagoTitulo">
+			<button class="pago-cerrar" type="button" data-cerrar-pago aria-label="Cerrar opciones de pago">&times;</button>
+			<div class="pago-cabecera">
+				<p class="eyebrow">Último paso</p>
+				<h2 id="pagoTitulo">¿Cómo quieres recibir tu pedido?</h2>
+				<p>Elige un método de pago y completa tus datos para preparar la entrega.</p>
+			</div>
+			<form id="formPago">
+				<fieldset class="metodos-pago">
+					<legend>Método de pago</legend>
+					<label class="metodo-pago"><input type="radio" name="metodoPago" value="PSE" checked><span><strong>PSE</strong><small>Pago seguro desde tu banco</small></span></label>
+					<label class="metodo-pago"><input type="radio" name="metodoPago" value="Contraentrega"><span><strong>Contraentrega</strong><small>Pagas cuando recibes tu pedido</small></span></label>
+					<label class="metodo-pago"><input type="radio" name="metodoPago" value="Tarjeta"><span><strong>Tarjeta</strong><small>Crédito o débito</small></span></label>
+				</fieldset>
+				<div class="datos-entrega">
+					<h3>Datos de entrega</h3>
+					<div class="campos-pago">
+						<label>Nombre de quien recibe<input name="nombre" required autocomplete="name"></label>
+						<label>Dirección de entrega<input name="direccion" required autocomplete="street-address"></label>
+						<label>Fecha máxima para entregar<input name="fechaEntrega" type="date" required></label>
+					</div>
+				</div>
+				<div class="datos-metodo" id="datosMetodo"></div>
+				<p class="error-pago" id="errorPago" role="alert"></p>
+				<button class="boton-enviar" type="submit">Enviar información</button>
+			</form>
+		</section>
+	</div>
+
 	<script>
 		if (!localStorage.getItem('token')) window.location.replace('/login');
 		const carritoKey = 'auraCarrito';
@@ -84,12 +115,33 @@
 			}
 			if (eliminar) { carrito.splice(Number(eliminar.dataset.eliminar), 1); guardar(); pintarCarrito(); }
 		});
-		document.getElementById('botonPago').addEventListener('click', () => {
-			if (!carrito.length) return;
+		const pagoModal = document.getElementById('pagoModal');
+		const datosMetodo = document.getElementById('datosMetodo');
+		const fechaMinima = new Date().toISOString().split('T')[0];
+		document.querySelector('[name="fechaEntrega"]').min = fechaMinima;
+		function pintarDatosMetodo(metodo) {
+			if (metodo === 'PSE') datosMetodo.innerHTML = '<label>Banco para PSE<select name="banco" required><option value="">Selecciona tu banco</option><option>Bancolombia</option><option>Davivienda</option><option>Banco de Bogotá</option><option>BBVA</option><option>Otro banco</option></select></label><label>Documento del titular<input name="documento" inputmode="numeric" required></label>';
+			else if (metodo === 'Tarjeta') datosMetodo.innerHTML = '<label>Número de tarjeta<input name="tarjeta" inputmode="numeric" minlength="12" maxlength="19" required></label><label>Nombre en la tarjeta<input name="titular" required></label><div class="campos-tarjeta"><label>Vencimiento<input name="vencimiento" placeholder="MM/AA" required></label><label>CVV<input name="cvv" inputmode="numeric" maxlength="4" required></label></div>';
+			else datosMetodo.innerHTML = '<p class="nota-metodo">Ten listo el valor total. Podrás pagarlo al recibir tu pedido.</p>';
+		}
+		pintarDatosMetodo('PSE');
+		document.querySelectorAll('[name="metodoPago"]').forEach((radio) => radio.addEventListener('change', () => pintarDatosMetodo(radio.value)));
+		document.getElementById('botonPago').addEventListener('click', () => { if (!carrito.length) return; pagoModal.hidden = false; document.body.classList.add('pago-abierto'); });
+		document.addEventListener('click', (evento) => { if (evento.target.closest('[data-cerrar-pago]')) { pagoModal.hidden = true; document.body.classList.remove('pago-abierto'); } });
+		document.getElementById('formPago').addEventListener('submit', (evento) => {
+			evento.preventDefault();
+			const datos = new FormData(evento.target);
+			if (!datos.get('nombre') || !datos.get('direccion') || !datos.get('fechaEntrega')) { document.getElementById('errorPago').textContent = 'Completa los datos de entrega.'; return; }
 			const numero = `AM-${Date.now().toString().slice(-6)}`;
+			pagoModal.hidden = true;
+			document.body.classList.remove('pago-abierto');
+			carrito = [];
+			guardar();
+			pintarCarrito();
 			const confirmacion = document.getElementById('confirmacion');
-			confirmacion.innerHTML = `<strong>Pedido ${numero} preparado.</strong><span>Tu selección quedó lista para confirmar el pago. Pronto podrás completar el proceso.</span>`;
+			confirmacion.innerHTML = `<strong>Tu pedido ha sido enviado.</strong><span>Recibimos la información del pedido ${numero}. Te contactaremos para continuar con el pago y la entrega.</span>`;
 			confirmacion.hidden = false;
+			confirmacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
 		});
 		document.getElementById('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); });
 		async function iniciarCarrito() {
