@@ -30,7 +30,7 @@
 			<h2 id="resumen-title">Resumen de la tienda</h2>
 			<div class="admin-stats">
 				<div class="admin-stat">
-					<strong>0</strong>
+					<strong id="totalProductos">0</strong>
 					<span>Productos registrados</span>
 				</div>
 				<div class="admin-stat">
@@ -158,9 +158,20 @@
 
 		}
 
+		async function cargarTotalProductos() {
+			try {
+				const respuesta = await fetch('/api/productos');
+				const productos = await respuesta.json();
+				document.getElementById('totalProductos').textContent = respuesta.ok ? productos.length : '0';
+			} catch (error) {
+				document.getElementById('totalProductos').textContent = '0';
+			}
+		}
+
 
 		// Ejecutar al cargar el dashboard
 		cargarTotalUsuarios();
+		cargarTotalProductos();
 
 
 		// =====================================

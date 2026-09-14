@@ -33,9 +33,19 @@ app.get('/login', (req, res) => {
 });
 
 
+// Catálogo público de productos
+app.get('/productos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'productos.html'));
+});
+
+
 // Panel inicial del administrador
 app.get('/admin/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin', 'dashboard.html'));
+});
+
+app.get('/admin/productos.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'admin', 'productos.html'));
 });
 
 
@@ -61,6 +71,7 @@ app.get('/usuario/carrito.html', (req, res) => {
 app.use('/api/auth', require('./routes/authRoutes'));
 
 app.use('/api/usuario', require('./routes/usuarioRoutes'));
+app.use('/api/productos', require('./routes/productoRoutes'));
 
 
 // Iniciar servidor

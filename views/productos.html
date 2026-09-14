@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Productos | Aura Makeup</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/productos.css">
+</head>
+<body>
+	<header class="catalogo-header">
+		<a class="marca" href="/">Aura <span>Makeup</span></a>
+		<nav aria-label="Navegación principal">
+			<a href="/usuario/inicio.html">Mi espacio</a>
+			<a class="enlace-carrito" href="#carrito" aria-label="Abrir carrito">
+				<span aria-hidden="true">Bag</span>
+				<strong id="contadorCarrito">0</strong>
+			</a>
+		</nav>
+	</header>
+
+	<main>
+		<section class="catalogo-hero">
+			<div>
+				<p class="eyebrow">La belleza, a tu manera</p>
+				<h1>Tu ritual empieza <em>aquí.</em></h1>
+				<p class="hero-texto">Fórmulas pensadas para acompañarte, desde el primer toque de maquillaje hasta el último gesto de cuidado capilar.</p>
+			</div>
+			<div class="hero-sello" aria-hidden="true"><span>AM</span><small>curated beauty</small></div>
+		</section>
+
+		<div class="catalogo-controles">
+			<div class="filtros" role="group" aria-label="Filtrar productos">
+				<button class="filtro activo" type="button" data-filtro="todos">Todo</button>
+				<button class="filtro" type="button" data-filtro="cosmeticos">Cosméticos</button>
+				<button class="filtro" type="button" data-filtro="capilares">Cuidado capilar</button>
+			</div>
+			<p class="contador-productos"><span id="cantidadProductos">16</span> esenciales para ti</p>
+		</div>
+
+		<section class="categoria" data-categoria="cosmeticos" aria-labelledby="cosmeticos-title">
+			<div class="categoria-cabecera">
+				<div>
+					<p class="eyebrow">01 / rostro y color</p>
+					<h2 id="cosmeticos-title">Productos cosméticos</h2>
+				</div>
+				<p>Texturas ligeras, tonos que hablan de ti y ese pequeño gesto que cambia todo.</p>
+			</div>
+			<div class="productos-grid" id="gridCosmeticos"></div>
+		</section>
+
+		<section class="categoria" data-categoria="capilares" aria-labelledby="capilares-title">
+			<div class="categoria-cabecera">
+				<div>
+					<p class="eyebrow">02 / cuidado diario</p>
+					<h2 id="capilares-title">Productos capilares</h2>
+				</div>
+				<p>Pequeños rituales para que tu cabello se sienta tan bien como se ve.</p>
+			</div>
+			<div class="productos-grid productos-grid-capilar" id="gridCapilares"></div>
+		</section>
+	</main>
+
+	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+	<div class="modal-producto" id="modalProducto" hidden>
+		<div class="modal-fondo" data-cerrar-modal></div>
+		<section class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+			<button class="modal-cerrar" type="button" data-cerrar-modal aria-label="Cerrar detalle">&times;</button>
+			<div class="modal-imagen"><img id="modalImagen" src="" alt=""></div>
+			<div class="modal-detalle">
+				<p class="producto-tipo" id="modalTipo"></p>
+				<h2 id="modalTitulo"></h2>
+				<p class="modal-precio" id="modalPrecio"></p>
+				<p class="modal-descripcion" id="modalDescripcion"></p>
+				<div class="modal-opciones" id="modalOpciones"></div>
+				<button class="modal-agregar" id="modalAgregar" type="button">Agregar al carrito</button>
+			</div>
+		</section>
+	</div>
+
+	<script>
+		let productos = [
+			{ nombre: 'LUMÉA', tipo: 'Corrector', categoria: 'cosmeticos', emoji: '✨', precio: 34900, descripcion: 'Cobertura modulable que ilumina la mirada y unifica el tono con un acabado natural y ligero.', imagen: '/images/productos/lumea.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Marfil', 'Beige claro', 'Beige medio', 'Arena', 'Caramelo'] } },
+			{ nombre: 'VELUNA', tipo: 'Base', categoria: 'cosmeticos', emoji: '🤍', precio: 49900, descripcion: 'Base ligera y confortable que deja la piel uniforme, fresca y luminosa durante todo el día.', imagen: '/images/productos/veluna.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Porcelana', 'Marfil', 'Beige claro', 'Beige medio', 'Caramelo'] } },
+			{ nombre: 'ÉLARA', tipo: 'Pestañina', categoria: 'cosmeticos', emoji: '🖤', precio: 29900, descripcion: 'Máscara que define, alarga y aporta volumen para una mirada intensa y elegante.', imagen: '/images/productos/elara.png' },
+			{ nombre: 'NUVÉ', tipo: 'Polvo Suelto', categoria: 'cosmeticos', emoji: '☁️', precio: 34900, descripcion: 'Polvo ultrafino que sella el maquillaje, controla el brillo y deja un acabado suave y natural.', imagen: '/images/productos/nuve.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Translúcido', 'Banana', 'Almendra'] } },
+			{ nombre: 'SELENE', tipo: 'Gel de Cejas', categoria: 'cosmeticos', emoji: '🌙', precio: 24900, descripcion: 'Gel fijador que peina, define y mantiene las cejas en su lugar con un acabado natural.', imagen: '/images/productos/selene.png' },
+			{ nombre: 'SOLÉA', tipo: 'Iluminador', categoria: 'cosmeticos', emoji: '✨', precio: 29900, descripcion: 'Iluminador de brillo sedoso que aporta un efecto radiante y delicado a la piel.', imagen: '/images/productos/solea.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Champagne', 'Dorado suave', 'Bronce rosado'] } },
+			{ nombre: 'ROSÉLIA', tipo: 'Rubor', categoria: 'cosmeticos', emoji: '🌸', precio: 29900, descripcion: 'Rubor de textura suave que aporta un toque de color fresco y natural al rostro.', imagen: '/images/productos/roselia.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Rosa pétalo', 'Coral fresco', 'Terracota'] } },
+			{ nombre: 'SCULPTÉ', tipo: 'Contorno', categoria: 'cosmeticos', emoji: '🤎', precio: 29900, descripcion: 'Contorno cremoso que define y da dimensión al rostro de forma fácil, difuminada y natural.', imagen: '/images/productos/sculpte.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Light', 'Deep'] } },
+			{ nombre: 'AMOURA', tipo: 'Labial', categoria: 'cosmeticos', emoji: '💋', precio: 24900, descripcion: 'Labial cremoso de color intenso que deja los labios suaves, definidos y protagonistas.', imagen: '/images/productos/amoura.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Nude Aura', 'Rosa Amour', 'Rojo Éclat', 'Terracota', 'Berry'] } },
+			{ nombre: 'ÉCLAT', tipo: 'Gloss', categoria: 'cosmeticos', emoji: '💎', precio: 22900, descripcion: 'Gloss de efecto cristal que aporta brillo intenso y una apariencia jugosa a los labios.', imagen: '/images/productos/eclat.png', opciones: { etiqueta: 'Selecciona un tono', valores: ['Crystal', 'Pink Glow', 'Nude Shine', 'Rose Gold', 'Berry Glass'] } },
+			{ nombre: 'ASTRA', tipo: 'Paleta de Sombras', categoria: 'cosmeticos', emoji: '🌌', precio: 54900, descripcion: 'Paleta inspirada en los tonos del universo, perfecta para crear looks naturales, sofisticados o glam.', imagen: '/images/productos/astra.png' },
+			{ nombre: 'ESSENZA', tipo: 'Kit de Brochas', categoria: 'cosmeticos', emoji: '🖌️', precio: 59900, descripcion: 'Colección de brochas suaves y precisas diseñada para aplicar, difuminar y perfeccionar cada look.', imagen: '/images/productos/essenza.png' },
+			{ nombre: 'Velvet Hair', tipo: 'Perfume Capilar', categoria: 'capilares', emoji: '🤎', precio: 39900, descripcion: 'Un perfume capilar delicado con un aroma floral y dulce que deja tu cabello con una fragancia agradable durante todo el día. Su esencia aporta una sensación fresca y femenina, perfecta para complementar tu rutina de cuidado.', imagen: '/images/productos/velvet-hair.png', opciones: { etiqueta: 'Selecciona un aroma', valores: ['Vainilla floral', 'Rosa dulce', 'Jazmín fresco', 'Frutos rojos'] } },
+			{ nombre: 'Soft Brush', tipo: 'Cepillo para Cabello', categoria: 'capilares', emoji: '🤎', precio: 19900, descripcion: 'Un cepillo diseñado para desenredar el cabello suavemente y facilitar el peinado. Sus cerdas flexibles ayudan a reducir los tirones y el frizz, dejando el cabello más suave, ordenado y brillante.', imagen: '/images/productos/soft-brush.png' },
+			{ nombre: 'Glow Tips', tipo: 'Aceite para Puntas', categoria: 'capilares', emoji: '🤎', precio: 29900, descripcion: 'Un aceite ligero creado para cuidar las puntas del cabello. Ayuda a aportar suavidad, brillo y una apariencia más saludable, dejando las puntas con un acabado bonito y sin sensación pesada.', imagen: '/images/productos/glow-tips.png' },
+			{ nombre: 'Silky Night', tipo: 'Gorro de Satin', categoria: 'capilares', emoji: '🤎', precio: 24900, descripcion: 'Un gorro de satín pensado para proteger tu cabello mientras duermes. Ayuda a disminuir el frizz y a conservar el peinado, manteniendo el cabello suave, ordenado y con más brillo al despertar.', imagen: '/images/productos/silky-night.png', opciones: { etiqueta: 'Selecciona un color', valores: ['Champagne', 'Rosa polvo', 'Café cacao', 'Negro'] } }
+		];
+
+		const carrito = JSON.parse(localStorage.getItem('auraCarrito') || '[]');
+		const dinero = (valor) => `$${valor.toLocaleString('es-CO')}`;
+		const formatoNombre = (producto) => `<article class="producto-card"><div class="producto-imagen"><img src="${producto.imagen}" alt="${producto.tipo} ${producto.nombre}" loading="lazy"><span class="producto-emoji" aria-hidden="true">${producto.emoji}</span><button class="boton-agregar" type="button" data-producto="${producto.nombre}" aria-label="Agregar ${producto.nombre} al carrito">+</button></div><div class="producto-info"><p class="producto-tipo">${producto.tipo}</p><h3>${producto.nombre}</h3><p class="producto-precio">${dinero(producto.precio)}</p><p class="producto-descripcion">${producto.descripcion}</p><button class="boton-detalle" type="button" data-detalle="${producto.nombre}">Ver producto</button></div></article>`;
+
+		function renderProductos(filtro = 'todos') {
+			const visibles = filtro === 'todos' ? productos : productos.filter((producto) => producto.categoria === filtro);
+			document.getElementById('gridCosmeticos').innerHTML = visibles.filter((producto) => producto.categoria === 'cosmeticos').map(formatoNombre).join('');
+			document.getElementById('gridCapilares').innerHTML = visibles.filter((producto) => producto.categoria === 'capilares').map(formatoNombre).join('');
+			document.querySelector('[data-categoria="cosmeticos"]').hidden = !visibles.some((producto) => producto.categoria === 'cosmeticos');
+			document.querySelector('[data-categoria="capilares"]').hidden = !visibles.some((producto) => producto.categoria === 'capilares');
+			document.getElementById('cantidadProductos').textContent = visibles.length;
+		}
+
+		function actualizarCarrito() {
+			document.getElementById('contadorCarrito').textContent = carrito.length;
+			localStorage.setItem('auraCarrito', JSON.stringify(carrito));
+		}
+
+		let productoSeleccionado = null;
+		const modal = document.getElementById('modalProducto');
+
+		function abrirDetalle(producto) {
+			productoSeleccionado = producto;
+			document.getElementById('modalImagen').src = producto.imagen;
+			document.getElementById('modalImagen').alt = `${producto.tipo} ${producto.nombre}`;
+			document.getElementById('modalTipo').textContent = producto.tipo;
+			document.getElementById('modalTitulo').textContent = producto.nombre;
+			document.getElementById('modalPrecio').textContent = dinero(producto.precio);
+			document.getElementById('modalDescripcion').textContent = producto.descripcion;
+			const opciones = document.getElementById('modalOpciones');
+			if (producto.opciones) {
+				opciones.hidden = false;
+				opciones.innerHTML = `<p>${producto.opciones.etiqueta}</p><div class="opciones-lista">${producto.opciones.valores.map((valor, indice) => `<label class="opcion-variante"><input type="radio" name="variante" value="${valor}" ${indice === 0 ? 'checked' : ''}><span>${valor}</span></label>`).join('')}</div>`;
+			} else {
+				opciones.hidden = true;
+				opciones.innerHTML = '';
+			}
+			modal.hidden = false;
+			document.body.classList.add('modal-abierto');
+			document.getElementById('modalAgregar').focus();
+		}
+
+		function cerrarDetalle() {
+			modal.hidden = true;
+			document.body.classList.remove('modal-abierto');
+			productoSeleccionado = null;
+		}
+
+		document.addEventListener('click', (evento) => {
+			const botonDetalle = evento.target.closest('.boton-detalle');
+			if (botonDetalle) {
+				const producto = productos.find((item) => item.nombre === botonDetalle.dataset.detalle);
+				abrirDetalle(producto);
+				return;
+			}
+			if (evento.target.closest('[data-cerrar-modal]')) cerrarDetalle();
+		});
+
+		document.getElementById('modalAgregar').addEventListener('click', () => {
+			if (!productoSeleccionado) return;
+			const nombreProducto = productoSeleccionado.nombre;
+			const variante = document.querySelector('input[name="variante"]:checked')?.value;
+			carrito.push(variante ? `${nombreProducto} - ${variante}` : nombreProducto);
+			actualizarCarrito();
+			cerrarDetalle();
+			const toast = document.getElementById('toast');
+			toast.textContent = `${nombreProducto} se agregó a tu carrito`;
+			toast.classList.add('visible');
+			setTimeout(() => toast.classList.remove('visible'), 2200);
+		});
+
+		document.addEventListener('keydown', (evento) => {
+			if (evento.key === 'Escape' && !modal.hidden) cerrarDetalle();
+		});
+
+		document.querySelectorAll('.filtro').forEach((boton) => boton.addEventListener('click', () => {
+			document.querySelector('.filtro.activo').classList.remove('activo');
+			boton.classList.add('activo');
+			renderProductos(boton.dataset.filtro);
+		}));
+
+		document.addEventListener('click', (evento) => {
+			if (!evento.target.matches('.boton-agregar')) return;
+			const producto = productos.find((item) => item.nombre === evento.target.dataset.producto);
+			carrito.push(producto.nombre);
+			actualizarCarrito();
+			const toast = document.getElementById('toast');
+			toast.textContent = `${producto.nombre} se agregó a tu carrito`;
+			toast.classList.add('visible');
+			setTimeout(() => toast.classList.remove('visible'), 2200);
+		});
+
+		async function cargarProductos() {
+			try {
+				const respuesta = await fetch('/api/productos');
+				if (!respuesta.ok) throw new Error('No se pudo cargar el catálogo');
+				productos = await respuesta.json();
+			} catch (error) {
+				console.error(error);
+			}
+			renderProductos();
+			actualizarCarrito();
+		}
+
+		cargarProductos();
+	</script>
+</body>
+</html>

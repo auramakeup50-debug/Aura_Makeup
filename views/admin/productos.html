@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Productos | Panel admin</title>
+	<link rel="stylesheet" href="/css/admin.css">
+	<style>
+		.productos-admin-cabecera { align-items: end; display: flex; justify-content: space-between; gap: 20px; }
+		.productos-admin-cabecera h1 { color: var(--vino-oscuro); font-size: clamp(2rem, 5vw, 3.6rem); font-weight: normal; margin: 0; }
+		.productos-admin-cabecera p { color: #876967; line-height: 1.5; max-width: 420px; }
+		.productos-admin-layout { display: grid; gap: 24px; grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.5fr); margin-top: 34px; }
+		.producto-form, .producto-lista { background: #fff; border: 1px solid var(--borde); border-radius: 7px; padding: 24px; }
+		.producto-form h2, .producto-lista h2 { color: var(--vino-oscuro); font-size: 1.25rem; font-weight: normal; margin: 0 0 20px; }
+		#formProducto { display: grid; gap: 14px; }
+		.campo-admin { display: grid; gap: 6px; }
+		.campo-admin label { color: var(--vino-oscuro); font-size: .82rem; font-weight: bold; }
+		.campo-admin input, .campo-admin select, .campo-admin textarea { border: 1px solid var(--borde); border-radius: 4px; color: var(--texto); font: inherit; padding: 10px; width: 100%; }
+		.campo-admin textarea { min-height: 92px; resize: vertical; }
+		.form-botones { display: flex; gap: 9px; margin-top: 4px; }
+		.boton-admin { background: var(--vino); border: 1px solid var(--vino); border-radius: 4px; color: #fff; cursor: pointer; font: inherit; padding: 11px 16px; }
+		.boton-admin.secundario { background: transparent; color: var(--vino); }
+		.lista-filtros { display: flex; gap: 8px; margin-bottom: 16px; }
+		.lista-filtros button { background: var(--rosa); border: 1px solid var(--borde); border-radius: 20px; color: var(--vino-oscuro); cursor: pointer; font: inherit; font-size: .78rem; padding: 7px 12px; }
+		.lista-filtros button.activo { background: var(--vino); color: #fff; }
+		.tabla-productos { border-collapse: collapse; width: 100%; }
+		.tabla-productos th { color: #876967; font-size: .7rem; letter-spacing: .08em; text-align: left; text-transform: uppercase; }
+		.tabla-productos th, .tabla-productos td { border-bottom: 1px solid var(--borde); padding: 12px 8px; vertical-align: middle; }
+		.tabla-productos td { font-size: .88rem; }
+		.tabla-productos img { background: var(--rosa); height: 58px; object-fit: contain; width: 50px; }
+		.nombre-producto { color: var(--vino-oscuro); font-weight: bold; }
+		.tipo-producto { color: #876967; display: block; font-size: .75rem; margin-top: 4px; }
+		.acciones-producto { display: flex; flex-wrap: wrap; gap: 5px; }
+		.accion-tabla { background: transparent; border: 1px solid var(--borde); border-radius: 4px; color: var(--vino); cursor: pointer; font: inherit; font-size: .75rem; padding: 6px 8px; }
+		.accion-tabla:hover { background: var(--rosa); }
+		.mensaje-admin { color: var(--vino); font-size: .85rem; min-height: 20px; }
+		@media (max-width: 850px) { .productos-admin-cabecera, .productos-admin-layout { display: block; } .productos-admin-cabecera p { margin-bottom: 0; } .producto-lista { margin-top: 24px; overflow-x: auto; } .tabla-productos { min-width: 650px; } }
+	</style>
+</head>
+<body>
+	<header class="admin-header">
+		<a class="admin-brand" href="/admin/dashboard.html">Aura Makeup</a>
+		<nav class="admin-nav" aria-label="Navegación administrativa">
+			<a href="/admin/usuarios.html">Usuarios</a>
+			<a href="/admin/productos.html">Productos</a>
+			<a href="/admin/pedidos.html">Pedidos</a>
+			<a class="admin-logout" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+	<main class="admin-content">
+		<section class="productos-admin-cabecera">
+			<div><p class="admin-kicker">Inventario y catálogo</p><h1>Productos</h1></div>
+			<p>Agrega, organiza, modifica o elimina productos. Los cambios se reflejan en el catálogo público.</p>
+		</section>
+		<div class="productos-admin-layout">
+			<section class="producto-form">
+				<h2 id="tituloFormulario">Agregar producto</h2>
+				<form id="formProducto">
+					<input type="hidden" id="productoId">
+					<div class="campo-admin"><label for="nombre">Nombre</label><input id="nombre" required></div>
+					<div class="campo-admin"><label for="tipo">Tipo</label><input id="tipo" required></div>
+					<div class="campo-admin"><label for="categoria">Categoría</label><select id="categoria"><option value="cosmeticos">Cosméticos</option><option value="capilares">Capilares</option></select></div>
+					<div class="campo-admin"><label for="precio">Precio (COP)</label><input id="precio" type="number" min="0" required></div>
+					<div class="campo-admin"><label for="imagen">Ruta de imagen</label><input id="imagen" placeholder="/images/productos/nuevo.png" required></div>
+					<div class="campo-admin"><label for="emoji">Emoji</label><input id="emoji" value="✨"></div>
+					<div class="campo-admin"><label for="descripcion">Descripción</label><textarea id="descripcion" required></textarea></div>
+					<div class="campo-admin"><label for="etiquetaOpciones">Etiqueta de variantes (opcional)</label><input id="etiquetaOpciones" placeholder="Selecciona un tono"></div>
+					<div class="campo-admin"><label for="valoresOpciones">Variantes separadas por coma</label><input id="valoresOpciones" placeholder="Marfil, Beige, Arena"></div>
+					<div class="form-botones"><button class="boton-admin" type="submit">Guardar producto</button><button class="boton-admin secundario" id="cancelarEdicion" type="button" hidden>Cancelar</button></div>
+					<p class="mensaje-admin" id="mensajeAdmin" role="status"></p>
+				</form>
+			</section>
+			<section class="producto-lista">
+				<h2>Catálogo actual <span id="totalProductos"></span></h2>
+				<div class="lista-filtros"><button class="activo" data-filtro="todos">Todos</button><button data-filtro="cosmeticos">Cosméticos</button><button data-filtro="capilares">Capilares</button></div>
+				<table class="tabla-productos"><thead><tr><th>Producto</th><th>Precio</th><th>Variantes</th><th>Acciones</th></tr></thead><tbody id="listaProductos"></tbody></table>
+			</section>
+		</div>
+	</main>
+	<script>
+		const token = localStorage.getItem('token');
+		const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+		if (!token || !usuario || usuario.rol !== 'admin') window.location.replace('/login');
+		let productos = [];
+		let filtroActual = 'todos';
+		const $ = (id) => document.getElementById(id);
+		const dinero = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const opcionesTexto = (producto) => producto.opciones?.valores?.length ? `${producto.opciones.valores.length} opciones` : 'Sin variantes';
+		async function peticion(url, opciones = {}) { const respuesta = await fetch(url, { ...opciones, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(opciones.headers || {}) } }); if (respuesta.status === 401 || respuesta.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.replace('/login'); } const datos = await respuesta.json(); if (!respuesta.ok) throw new Error(datos.mensaje || 'No se pudo completar la operación'); return datos; }
+		function renderLista() { const visibles = filtroActual === 'todos' ? productos : productos.filter((producto) => producto.categoria === filtroActual); $('totalProductos').textContent = `(${productos.length})`; $('listaProductos').innerHTML = visibles.map((producto) => `<tr><td><img src="${producto.imagen}" alt=""><span class="nombre-producto">${producto.nombre}</span><span class="tipo-producto">${producto.tipo}</span></td><td>${dinero(producto.precio)}</td><td>${opcionesTexto(producto)}</td><td><div class="acciones-producto"><button class="accion-tabla" data-editar="${producto.id}">Editar</button><button class="accion-tabla" data-subir="${producto.id}">↑</button><button class="accion-tabla" data-bajar="${producto.id}">↓</button><button class="accion-tabla" data-eliminar="${producto.id}">Eliminar</button></div></td></tr>`).join(''); }
+		async function cargarProductos() { productos = await peticion('/api/productos'); renderLista(); }
+		function llenarFormulario(producto) { $('productoId').value = producto.id; $('nombre').value = producto.nombre; $('tipo').value = producto.tipo; $('categoria').value = producto.categoria; $('precio').value = producto.precio; $('imagen').value = producto.imagen; $('emoji').value = producto.emoji; $('descripcion').value = producto.descripcion; $('etiquetaOpciones').value = producto.opciones?.etiqueta || ''; $('valoresOpciones').value = producto.opciones?.valores?.join(', ') || ''; $('tituloFormulario').textContent = 'Editar producto'; $('cancelarEdicion').hidden = false; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+		function limpiarFormulario() { $('formProducto').reset(); $('productoId').value = ''; $('emoji').value = '✨'; $('tituloFormulario').textContent = 'Agregar producto'; $('cancelarEdicion').hidden = true; }
+		$('formProducto').addEventListener('submit', async (evento) => { evento.preventDefault(); const valores = $('valoresOpciones').value.split(',').map((valor) => valor.trim()).filter(Boolean); const datos = { nombre: $('nombre').value.trim(), tipo: $('tipo').value.trim(), categoria: $('categoria').value, precio: Number($('precio').value), imagen: $('imagen').value.trim(), emoji: $('emoji').value.trim() || '✨', descripcion: $('descripcion').value.trim(), opciones: valores.length ? { etiqueta: $('etiquetaOpciones').value.trim() || 'Selecciona una opción', valores } : null }; try { const id = $('productoId').value; await peticion(id ? `/api/productos/${id}` : '/api/productos', { method: id ? 'PUT' : 'POST', body: JSON.stringify(datos) }); $('mensajeAdmin').textContent = 'Producto guardado correctamente.'; limpiarFormulario(); await cargarProductos(); } catch (error) { $('mensajeAdmin').textContent = error.message; } });
+		$('cancelarEdicion').addEventListener('click', limpiarFormulario);
+		document.querySelectorAll('.lista-filtros button').forEach((boton) => boton.addEventListener('click', () => { document.querySelector('.lista-filtros .activo').classList.remove('activo'); boton.classList.add('activo'); filtroActual = boton.dataset.filtro; renderLista(); }));
+		document.addEventListener('click', async (evento) => { const editar = evento.target.closest('[data-editar]'); const eliminar = evento.target.closest('[data-eliminar]'); const mover = evento.target.closest('[data-subir], [data-bajar]'); try { if (editar) llenarFormulario(productos.find((producto) => producto.id === Number(editar.dataset.editar))); if (eliminar && confirm('¿Eliminar este producto del catálogo?')) { await peticion(`/api/productos/${eliminar.dataset.eliminar}`, { method: 'DELETE' }); await cargarProductos(); } if (mover) { const id = Number(mover.dataset.subir || mover.dataset.bajar); const indice = productos.findIndex((producto) => producto.id === id); const destino = mover.dataset.subir !== undefined ? indice - 1 : indice + 1; if (destino >= 0 && destino < productos.length) { [productos[indice], productos[destino]] = [productos[destino], productos[indice]]; productos = await peticion('/api/productos/orden', { method: 'PUT', body: JSON.stringify({ orden: productos.map((producto) => producto.id) }) }); renderLista(); } } } catch (error) { $('mensajeAdmin').textContent = error.message; } });
+		$('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); });
+		cargarProductos().catch((error) => { $('mensajeAdmin').textContent = error.message; });
+	</script>
+</body>
+</html>
