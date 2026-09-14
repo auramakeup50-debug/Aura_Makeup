@@ -128,20 +128,30 @@
 		document.querySelectorAll('[name="metodoPago"]').forEach((radio) => radio.addEventListener('change', () => pintarDatosMetodo(radio.value)));
 		document.getElementById('botonPago').addEventListener('click', () => { if (!carrito.length) return; pagoModal.hidden = false; document.body.classList.add('pago-abierto'); });
 		document.addEventListener('click', (evento) => { if (evento.target.closest('[data-cerrar-pago]')) { pagoModal.hidden = true; document.body.classList.remove('pago-abierto'); } });
-		document.getElementById('formPago').addEventListener('submit', (evento) => {
+		document.getElementById('formPago').addEventListener('submit', async (evento) => {
 			evento.preventDefault();
 			const datos = new FormData(evento.target);
 			if (!datos.get('nombre') || !datos.get('direccion') || !datos.get('fechaEntrega')) { document.getElementById('errorPago').textContent = 'Completa los datos de entrega.'; return; }
 			const numero = `AM-${Date.now().toString().slice(-6)}`;
-			pagoModal.hidden = true;
-			document.body.classList.remove('pago-abierto');
-			carrito = [];
-			guardar();
-			pintarCarrito();
+			const total = carrito.reduce((suma, item) => suma + (item.precio * item.cantidad), 0);
+			const errorPago = document.getElementById('errorPago');
+			errorPago.textContent = '';
+			try {
+				const respuesta = await fetch('/api/pedidos', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ productos: carrito, metodoPago: datos.get('metodoPago'), nombre: datos.get('nombre'), direccion: datos.get('direccion'), fechaEntrega: datos.get('fechaEntrega'), total }) });
+				const resultado = await respuesta.json();
+				if (!respuesta.ok) throw new Error(resultado.mensaje || 'No se pudo enviar el pedido.');
+				pagoModal.hidden = true;
+				document.body.classList.remove('pago-abierto');
+				carrito = [];
+				guardar();
+				pintarCarrito();
 			const confirmacion = document.getElementById('confirmacion');
-			confirmacion.innerHTML = `<strong>Tu pedido ha sido enviado.</strong><span>Recibimos la información del pedido ${numero}. Te contactaremos para continuar con el pago y la entrega.</span>`;
+				confirmacion.innerHTML = `<strong>Tu pedido ha sido enviado.</strong><span>Recibimos la información del pedido ${resultado.pedido.numero || numero}. Puedes consultar su estado en tu historial.</span>`;
 			confirmacion.hidden = false;
 			confirmacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			} catch (error) {
+				errorPago.textContent = error.message;
+			}
 		});
 		document.getElementById('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); });
 		async function iniciarCarrito() {

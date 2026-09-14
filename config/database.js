@@ -69,4 +69,23 @@ if (totalProductos === 0) {
     console.log('Catálogo inicial de productos listo');
 }
 
+db.exec(`
+    CREATE TABLE IF NOT EXISTS pedidos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        numero TEXT NOT NULL UNIQUE,
+        usuario_id INTEGER NOT NULL,
+        fecha_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+        estado TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado')),
+        metodo_pago TEXT NOT NULL,
+        nombre_receptor TEXT NOT NULL,
+        direccion TEXT NOT NULL,
+        fecha_maxima TEXT NOT NULL,
+        total INTEGER NOT NULL,
+        productos TEXT NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+`);
+
+console.log('Tabla pedidos lista');
+
 module.exports = db;

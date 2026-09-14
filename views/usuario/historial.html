@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mis pedidos | Aura Makeup</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/historial.css">
+</head>
+<body>
+	<header class="historial-header">
+		<a class="historial-marca" href="/usuario/inicio.html">Aura <span>Makeup</span></a>
+		<nav class="historial-nav" aria-label="Navegación de cuenta"><a href="/productos">Seguir comprando</a><a href="/usuario/carrito.html">Mi carrito</a><a class="salir" href="/login" id="cerrarSesion">Cerrar sesión</a></nav>
+	</header>
+	<main class="historial-main">
+		<section class="historial-intro"><p class="eyebrow">Tu recorrido Aura</p><h1>Pedidos que cuentan <em>tu historia.</em></h1><p>Consulta tus compras anteriores, revisa cada detalle y sigue el estado de tus pedidos.</p></section>
+		<section aria-labelledby="pedidos-title"><div class="historial-barra"><h2 id="pedidos-title">Mis compras</h2><span class="contador-pedidos" id="contadorPedidos">Cargando pedidos...</span></div><div class="lista-pedidos" id="listaPedidos"></div></section>
+	</main>
+	<div class="detalle-modal" id="detalleModal" hidden><div class="detalle-fondo" data-cerrar-detalle></div><section class="detalle-contenido" role="dialog" aria-modal="true" aria-labelledby="detalleTitulo"><button class="detalle-cerrar" type="button" data-cerrar-detalle aria-label="Cerrar detalle">&times;</button><p class="eyebrow">Detalle de compra</p><h2 id="detalleTitulo"></h2><p class="detalle-meta" id="detalleMeta"></p><div id="detalleProductos"></div><div class="detalle-datos" id="detalleDatos"></div></section></div>
+	<script>
+		if (!localStorage.getItem('token')) window.location.replace('/login');
+		const token = localStorage.getItem('token'); let pedidos = [];
+		const dinero = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const fecha = (valor) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(`${valor.replace(' ', 'T')}Z`));
+		const escapar = (valor) => String(valor).replace(/[&<>'"]/g, (caracter) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[caracter]));
+		const estadoTexto = { pendiente:'Pendiente', confirmado:'Confirmado', enviado:'Enviado', entregado:'Entregado', cancelado:'Cancelado' };
+		function pintarPedidos() {
+			const lista = document.getElementById('listaPedidos'); document.getElementById('contadorPedidos').textContent = `${pedidos.length} ${pedidos.length === 1 ? 'pedido realizado' : 'pedidos realizados'}`;
+			if (!pedidos.length) { lista.innerHTML = '<div class="historial-vacio"><strong>Aún no tienes pedidos.</strong><p>Cuando completes una compra, aparecerá aquí con todos sus detalles.</p><a class="boton-tienda" href="/productos">Explorar productos</a></div>'; return; }
+			lista.innerHTML = pedidos.map((pedido) => { const unidades = pedido.productos.reduce((total, item) => total + item.cantidad, 0); return `<article class="pedido-card"><div class="pedido-cabecera"><div><div class="pedido-numero">Pedido ${escapar(pedido.numero)}</div><div class="pedido-fecha">${fecha(pedido.fecha_pedido)}</div></div><span class="estado estado-${escapar(pedido.estado)}">${estadoTexto[pedido.estado] || pedido.estado}</span></div><div class="pedido-resumen"><span class="pedido-productos">${unidades} ${unidades === 1 ? 'producto' : 'productos'} · ${escapar(pedido.metodo_pago)}</span><strong class="pedido-total">${dinero(pedido.total)}</strong><button class="boton-detalle-pedido" type="button" data-detalle="${pedido.id}">Ver detalles</button></div></article>`; }).join('');
+		}
+		function abrirDetalle(pedido) { document.getElementById('detalleTitulo').textContent = `Pedido ${pedido.numero}`; document.getElementById('detalleMeta').textContent = `${fecha(pedido.fecha_pedido)} · Estado: ${estadoTexto[pedido.estado] || pedido.estado}`; document.getElementById('detalleProductos').innerHTML = pedido.productos.map((item) => `<div class="detalle-linea"><img src="${escapar(item.imagen)}" alt="${escapar(item.nombre)}"><div><strong>${escapar(item.nombre)}</strong><span>${escapar(item.variante || item.tipo || '')} · Cantidad: ${item.cantidad}</span></div><b>${dinero(item.precio * item.cantidad)}</b></div>`).join(''); document.getElementById('detalleDatos').innerHTML = `<strong>Entrega</strong><br>Recibe: ${escapar(pedido.nombre_receptor)}<br>Dirección: ${escapar(pedido.direccion)}<br>Fecha máxima: ${escapar(pedido.fecha_maxima)}<br>Método de pago: ${escapar(pedido.metodo_pago)}<br><strong>Total: ${dinero(pedido.total)}</strong>`; document.getElementById('detalleModal').hidden = false; document.body.style.overflow = 'hidden'; }
+		async function cargarPedidos() { try { const respuesta = await fetch('/api/pedidos/mis-pedidos', { headers: { Authorization: `Bearer ${token}` } }); if (respuesta.status === 401) { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.replace('/login'); return; } if (!respuesta.ok) throw new Error('No se pudo cargar el historial.'); pedidos = await respuesta.json(); pintarPedidos(); } catch (error) { document.getElementById('contadorPedidos').textContent = error.message; document.getElementById('listaPedidos').innerHTML = ''; } }
+		document.addEventListener('click', (evento) => { const boton = evento.target.closest('[data-detalle]'); if (boton) abrirDetalle(pedidos.find((pedido) => pedido.id === Number(boton.dataset.detalle))); if (evento.target.closest('[data-cerrar-detalle]')) { document.getElementById('detalleModal').hidden = true; document.body.style.overflow = ''; } });
+		document.addEventListener('keydown', (evento) => { if (evento.key === 'Escape') { document.getElementById('detalleModal').hidden = true; document.body.style.overflow = ''; } });
+		document.getElementById('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); }); cargarPedidos();
+	</script>
+</body>
+</html>

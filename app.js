@@ -77,6 +77,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/usuario', require('./routes/usuarioRoutes'));
 app.use('/api/productos', require('./routes/productoRoutes'));
 app.use('/api/admin/usuarios', require('./routes/adminUsuarioRoutes'));
+app.use('/api/pedidos', require('./routes/pedidoRoutes'));
 
 
 // Iniciar servidor
