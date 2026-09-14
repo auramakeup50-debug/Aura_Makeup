@@ -48,6 +48,10 @@ app.get('/admin/productos.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin', 'productos.html'));
 });
 
+app.get('/admin/usuarios.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'admin', 'usuarios.html'));
+});
+
 
 // Páginas del usuario
 app.get('/usuario/inicio.html', (req, res) => {
@@ -72,6 +76,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 app.use('/api/usuario', require('./routes/usuarioRoutes'));
 app.use('/api/productos', require('./routes/productoRoutes'));
+app.use('/api/admin/usuarios', require('./routes/adminUsuarioRoutes'));
 
 
 // Iniciar servidor

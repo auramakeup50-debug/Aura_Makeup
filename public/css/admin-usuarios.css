@@ -1,0 +1,74 @@
+:root {
+	--negro: #100d17;
+	--negro-suave: #191422;
+	--morado: #5d3a86;
+	--morado-claro: #cbb8ec;
+	--lavanda: #eee8fb;
+	--texto: #34283f;
+	--borde: #ded3ef;
+	--blanco: #fff;
+	font-family: 'DM Sans', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+.sr-only { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0, 0, 0, 0); }
+
+body {
+	background: radial-gradient(circle at 90% 0, rgba(126, 82, 177, .28), transparent 30%), linear-gradient(135deg, #faf8ff, #eee8fb 60%, #fff);
+	color: var(--texto);
+	margin: 0;
+	min-height: 100vh;
+}
+
+.usuarios-header { align-items: center; background: var(--negro); display: flex; justify-content: space-between; padding: 18px clamp(20px, 6vw, 76px); }
+.usuarios-brand { color: #fff; font-family: Georgia, serif; font-size: 1.45rem; text-decoration: none; }
+.usuarios-brand span { color: var(--morado-claro); font-size: .78em; }
+.usuarios-nav { align-items: center; display: flex; gap: 20px; }
+.usuarios-nav a { color: #eee8fb; font-size: .9rem; text-decoration: none; }
+.usuarios-nav a:hover { color: #fff; }
+.usuarios-salir { border: 1px solid #8068a8; padding: 8px 12px; }
+
+.usuarios-contenido { margin: 0 auto; max-width: 1200px; padding: clamp(42px, 7vw, 76px) 24px 70px; }
+.usuarios-intro { align-items: end; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; padding-bottom: 36px; }
+.usuarios-kicker { color: var(--morado); font-size: .72rem; font-weight: 700; letter-spacing: .15em; margin: 0 0 12px; text-transform: uppercase; }
+.usuarios-intro h1 { color: var(--negro-suave); font-family: Georgia, serif; font-size: clamp(2.3rem, 5vw, 4.4rem); font-weight: normal; line-height: 1; margin: 0; }
+.usuarios-intro p:last-child { color: #6d6080; line-height: 1.6; margin: 0; max-width: 350px; }
+
+.usuarios-resumen { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); padding: 28px 0; }
+.resumen-card { background: rgba(255, 255, 255, .82); border: 1px solid var(--borde); padding: 20px; }
+.resumen-card strong { color: var(--morado); display: block; font-size: 2rem; font-weight: 500; }
+.resumen-card span { color: #77698b; font-size: .78rem; }
+
+.usuarios-panel { background: rgba(255, 255, 255, .88); border: 1px solid var(--borde); padding: clamp(18px, 3vw, 30px); }
+.usuarios-panel-cabecera { align-items: center; display: flex; justify-content: space-between; margin-bottom: 22px; }
+.usuarios-panel h2 { color: var(--negro-suave); font-family: Georgia, serif; font-size: 1.45rem; font-weight: normal; margin: 0; }
+.usuarios-controles { display: flex; gap: 10px; }
+.usuarios-controles input, .usuarios-controles select { background: #fff; border: 1px solid var(--borde); color: var(--texto); font: inherit; padding: 10px 12px; }
+.usuarios-controles input { min-width: 230px; }
+
+.usuarios-tabla { border-collapse: collapse; width: 100%; }
+.usuarios-tabla th { color: #78688e; font-size: .68rem; letter-spacing: .1em; text-align: left; text-transform: uppercase; }
+.usuarios-tabla th, .usuarios-tabla td { border-bottom: 1px solid #ebe4f5; padding: 15px 10px; }
+.usuarios-tabla td { font-size: .9rem; }
+.usuario-identidad { align-items: center; display: flex; gap: 11px; }
+.usuario-avatar { align-items: center; background: var(--lavanda); border: 1px solid var(--morado-claro); border-radius: 50%; color: var(--morado); display: flex; flex: 0 0 38px; font-weight: 700; height: 38px; justify-content: center; width: 38px; }
+.usuario-nombre { color: var(--negro-suave); font-weight: 700; }
+.usuario-correo { color: #786b87; font-size: .8rem; margin-top: 3px; }
+.rol { display: inline-block; font-size: .72rem; letter-spacing: .04em; padding: 6px 10px; }
+.rol-admin { background: #e6d9fa; color: #58358a; }
+.rol-usuario { background: #f0edf5; color: #665675; }
+.fecha-usuario { color: #6d6080; white-space: nowrap; }
+.usuarios-vacio { color: #786b87; padding: 28px 10px !important; text-align: center; }
+.usuarios-error { color: #9a315b; font-size: .85rem; min-height: 20px; }
+
+@media (max-width: 760px) {
+	.usuarios-header, .usuarios-intro, .usuarios-panel-cabecera { align-items: flex-start; flex-direction: column; gap: 16px; }
+	.usuarios-nav { flex-wrap: wrap; gap: 12px 16px; }
+	.usuarios-intro p:last-child { margin-top: 4px; }
+	.usuarios-resumen { grid-template-columns: 1fr; }
+	.usuarios-controles { flex-wrap: wrap; width: 100%; }
+	.usuarios-controles input { min-width: 0; width: 100%; }
+	.usuarios-tabla { min-width: 700px; }
+	.usuarios-panel { overflow-x: auto; }
+}

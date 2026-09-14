@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Usuarios | Panel admin</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/admin-usuarios.css">
+</head>
+<body>
+	<header class="usuarios-header">
+		<a class="usuarios-brand" href="/admin/dashboard.html">Aura <span>Makeup</span></a>
+		<nav class="usuarios-nav" aria-label="Navegación administrativa">
+			<a href="/admin/dashboard.html">Resumen</a>
+			<a href="/admin/productos.html">Productos</a>
+			<a href="/admin/pedidos.html">Pedidos</a>
+			<a class="usuarios-salir" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+
+	<main class="usuarios-contenido">
+		<section class="usuarios-intro">
+			<div>
+				<p class="usuarios-kicker">Administración / comunidad</p>
+				<h1>Usuarios creados</h1>
+			</div>
+			<p>Consulta las cuentas registradas en Aura Makeup, sus roles y la fecha en que se unieron.</p>
+		</section>
+
+		<section class="usuarios-resumen" aria-label="Resumen de usuarios">
+			<div class="resumen-card"><strong id="totalUsuarios">0</strong><span>Usuarios registrados</span></div>
+			<div class="resumen-card"><strong id="totalAdmins">0</strong><span>Administradores</span></div>
+			<div class="resumen-card"><strong id="ultimoRegistro">--</strong><span>Último registro</span></div>
+		</section>
+
+		<section class="usuarios-panel" aria-labelledby="listaUsuariosTitulo">
+			<div class="usuarios-panel-cabecera">
+				<h2 id="listaUsuariosTitulo">Directorio de usuarios</h2>
+				<div class="usuarios-controles">
+					<label><span class="sr-only">Buscar usuario</span><input id="buscarUsuario" type="search" placeholder="Buscar por nombre o correo"></label>
+					<label><span class="sr-only">Filtrar por rol</span><select id="filtroRol"><option value="todos">Todos los roles</option><option value="admin">Administradores</option><option value="usuario">Usuarios</option></select></label>
+				</div>
+			</div>
+			<p class="usuarios-error" id="mensajeUsuarios" role="status"></p>
+			<table class="usuarios-tabla">
+				<thead><tr><th>Usuario</th><th>Rol</th><th>Fecha de registro</th></tr></thead>
+				<tbody id="tablaUsuarios"></tbody>
+			</table>
+		</section>
+	</main>
+
+	<script>
+		const token = localStorage.getItem('token');
+		const usuarioSesion = JSON.parse(localStorage.getItem('usuario') || 'null');
+		if (!token || !usuarioSesion || usuarioSesion.rol !== 'admin') window.location.replace('/login');
+
+		let usuarios = [];
+		const elementos = {
+			tabla: document.getElementById('tablaUsuarios'),
+			buscar: document.getElementById('buscarUsuario'),
+			rol: document.getElementById('filtroRol'),
+			mensaje: document.getElementById('mensajeUsuarios')
+		};
+		const fecha = (valor) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(`${valor.replace(' ', 'T')}Z`));
+		const iniciales = (nombre) => nombre.split(' ').map((parte) => parte[0]).slice(0, 2).join('').toUpperCase();
+
+		function pintarUsuarios() {
+			const consulta = elementos.buscar.value.toLowerCase().trim();
+			const rol = elementos.rol.value;
+			const filtrados = usuarios.filter((item) => (!consulta || `${item.nombre} ${item.correo}`.toLowerCase().includes(consulta)) && (rol === 'todos' || item.rol === rol));
+			if (!filtrados.length) {
+				elementos.tabla.innerHTML = '<tr><td class="usuarios-vacio" colspan="3">No hay usuarios que coincidan con la búsqueda.</td></tr>';
+				return;
+			}
+			elementos.tabla.innerHTML = filtrados.map((item) => `<tr><td><div class="usuario-identidad"><span class="usuario-avatar" aria-hidden="true">${iniciales(item.nombre)}</span><div><div class="usuario-nombre">${item.nombre}</div><div class="usuario-correo">${item.correo}</div></div></div></td><td><span class="rol rol-${item.rol}">${item.rol === 'admin' ? 'Administrador' : 'Usuario'}</span></td><td class="fecha-usuario">${fecha(item.fecha_registro)}</td></tr>`).join('');
+		}
+
+		async function cargarUsuarios() {
+			try {
+				const respuesta = await fetch('/api/admin/usuarios', { headers: { Authorization: `Bearer ${token}` } });
+				if (respuesta.status === 401 || respuesta.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.replace('/login'); return; }
+				if (!respuesta.ok) throw new Error('No se pudieron cargar los usuarios.');
+				usuarios = await respuesta.json();
+				document.getElementById('totalUsuarios').textContent = usuarios.length;
+				document.getElementById('totalAdmins').textContent = usuarios.filter((item) => item.rol === 'admin').length;
+				document.getElementById('ultimoRegistro').textContent = usuarios.length ? new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short' }).format(new Date(`${usuarios[0].fecha_registro.replace(' ', 'T')}Z`)) : '--';
+				pintarUsuarios();
+			} catch (error) {
+				elementos.mensaje.textContent = error.message;
+			}
+		}
+
+		elementos.buscar.addEventListener('input', pintarUsuarios);
+		elementos.rol.addEventListener('change', pintarUsuarios);
+		document.getElementById('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); });
+		cargarUsuarios();
+	</script>
+</body>
+</html>
