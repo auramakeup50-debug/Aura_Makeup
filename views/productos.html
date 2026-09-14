@@ -14,7 +14,7 @@
 		<a class="marca" href="/">Aura <span>Makeup</span></a>
 		<nav aria-label="Navegación principal">
 			<a href="/usuario/inicio.html">Mi espacio</a>
-			<a class="enlace-carrito" href="#carrito" aria-label="Abrir carrito">
+			<a class="enlace-carrito" href="/usuario/carrito.html" aria-label="Abrir carrito">
 				<span aria-hidden="true">Bag</span>
 				<strong id="contadorCarrito">0</strong>
 			</a>
@@ -101,8 +101,14 @@
 			{ nombre: 'Silky Night', tipo: 'Gorro de Satin', categoria: 'capilares', emoji: '🤎', precio: 24900, descripcion: 'Un gorro de satín pensado para proteger tu cabello mientras duermes. Ayuda a disminuir el frizz y a conservar el peinado, manteniendo el cabello suave, ordenado y con más brillo al despertar.', imagen: '/images/productos/silky-night.png', opciones: { etiqueta: 'Selecciona un color', valores: ['Champagne', 'Rosa polvo', 'Café cacao', 'Negro'] } }
 		];
 
-		const carrito = JSON.parse(localStorage.getItem('auraCarrito') || '[]');
+		let carrito = JSON.parse(localStorage.getItem('auraCarrito') || '[]');
 		const dinero = (valor) => `$${valor.toLocaleString('es-CO')}`;
+		function agregarAlCarrito(producto, variante = '') {
+			const existente = carrito.find((item) => item.id === producto.id && item.variante === variante);
+			if (existente) existente.cantidad += 1;
+			else carrito.push({ id: producto.id, nombre: producto.nombre, tipo: producto.tipo, imagen: producto.imagen, precio: producto.precio, variante, cantidad: 1 });
+			actualizarCarrito();
+		}
 		const formatoNombre = (producto) => `<article class="producto-card"><div class="producto-imagen"><img src="${producto.imagen}" alt="${producto.tipo} ${producto.nombre}" loading="lazy"><span class="producto-emoji" aria-hidden="true">${producto.emoji}</span><button class="boton-agregar" type="button" data-producto="${producto.nombre}" aria-label="Agregar ${producto.nombre} al carrito">+</button></div><div class="producto-info"><p class="producto-tipo">${producto.tipo}</p><h3>${producto.nombre}</h3><p class="producto-precio">${dinero(producto.precio)}</p><p class="producto-descripcion">${producto.descripcion}</p><button class="boton-detalle" type="button" data-detalle="${producto.nombre}">Ver producto</button></div></article>`;
 
 		function renderProductos(filtro = 'todos') {
@@ -115,7 +121,7 @@
 		}
 
 		function actualizarCarrito() {
-			document.getElementById('contadorCarrito').textContent = carrito.length;
+			document.getElementById('contadorCarrito').textContent = carrito.reduce((total, item) => total + (item.cantidad || 1), 0);
 			localStorage.setItem('auraCarrito', JSON.stringify(carrito));
 		}
 
@@ -163,8 +169,7 @@
 			if (!productoSeleccionado) return;
 			const nombreProducto = productoSeleccionado.nombre;
 			const variante = document.querySelector('input[name="variante"]:checked')?.value;
-			carrito.push(variante ? `${nombreProducto} - ${variante}` : nombreProducto);
-			actualizarCarrito();
+			agregarAlCarrito(productoSeleccionado, variante || '');
 			cerrarDetalle();
 			const toast = document.getElementById('toast');
 			toast.textContent = `${nombreProducto} se agregó a tu carrito`;
@@ -185,8 +190,7 @@
 		document.addEventListener('click', (evento) => {
 			if (!evento.target.matches('.boton-agregar')) return;
 			const producto = productos.find((item) => item.nombre === evento.target.dataset.producto);
-			carrito.push(producto.nombre);
-			actualizarCarrito();
+			agregarAlCarrito(producto);
 			const toast = document.getElementById('toast');
 			toast.textContent = `${producto.nombre} se agregó a tu carrito`;
 			toast.classList.add('visible');
@@ -198,6 +202,12 @@
 				const respuesta = await fetch('/api/productos');
 				if (!respuesta.ok) throw new Error('No se pudo cargar el catálogo');
 				productos = await respuesta.json();
+				carrito = carrito.flatMap((item) => {
+					if (typeof item !== 'string') return [{ ...item, cantidad: item.cantidad || 1 }];
+					const partes = item.split(' - ');
+					const producto = productos.find((actual) => actual.nombre === partes[0]);
+					return producto ? [{ id: producto.id, nombre: producto.nombre, tipo: producto.tipo, imagen: producto.imagen, precio: producto.precio, variante: partes.slice(1).join(' - '), cantidad: 1 }] : [];
+				});
 			} catch (error) {
 				console.error(error);
 			}

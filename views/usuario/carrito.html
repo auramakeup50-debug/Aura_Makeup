@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mi carrito | Aura Makeup</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/carrito.css">
+</head>
+<body>
+	<header class="carrito-header">
+		<a class="marca-carrito" href="/usuario/inicio.html">Aura <span>Makeup</span></a>
+		<nav class="carrito-nav" aria-label="Navegación de cuenta">
+			<a href="/productos">Seguir comprando</a>
+			<a href="/usuario/perfil.html">Mi perfil</a>
+			<a class="salir" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+
+	<main class="carrito-main">
+		<section class="carrito-intro">
+			<p class="eyebrow">Tu selección</p>
+			<h1>Todo lo que te hace <em>brillar.</em></h1>
+			<p>Revisa tus productos, ajusta las cantidades y conoce el total de tu compra antes de confirmar.</p>
+		</section>
+
+		<div class="carrito-layout">
+			<section class="carrito-lista" aria-labelledby="pedido-title">
+				<div class="carrito-lista-cabecera">
+					<h2 id="pedido-title">Tu pedido</h2>
+					<span class="contador-lineas" id="contadorLineas">0 productos</span>
+				</div>
+				<div id="listaCarrito"></div>
+			</section>
+
+			<aside class="resumen-compra" aria-labelledby="resumen-title">
+				<h2 id="resumen-title">Resumen de compra</h2>
+				<div class="resumen-linea"><span>Subtotal</span><strong id="subtotal">$0</strong></div>
+				<div class="resumen-linea"><span>Envío</span><strong id="envio">Gratis</strong></div>
+				<div class="resumen-linea resumen-total"><span>Total</span><strong id="total">$0</strong></div>
+				<button class="boton-pago" id="botonPago" type="button">Continuar al pago</button>
+				<p class="nota-pago">El pago se confirmará en el siguiente paso. Esta vista no procesa datos bancarios.</p>
+				<div class="confirmacion" id="confirmacion" hidden role="status"></div>
+			</aside>
+		</div>
+	</main>
+
+	<script>
+		if (!localStorage.getItem('token')) window.location.replace('/login');
+		const carritoKey = 'auraCarrito';
+		let carrito = JSON.parse(localStorage.getItem(carritoKey) || '[]');
+		const dinero = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const lista = document.getElementById('listaCarrito');
+		const escapeHtml = (valor) => String(valor).replace(/[&<>'"]/g, (caracter) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[caracter]));
+
+		function guardar() { localStorage.setItem(carritoKey, JSON.stringify(carrito)); }
+		function resumen() {
+			const cantidad = carrito.reduce((total, item) => total + item.cantidad, 0);
+			const subtotal = carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
+			document.getElementById('contadorLineas').textContent = `${cantidad} ${cantidad === 1 ? 'producto' : 'productos'}`;
+			document.getElementById('subtotal').textContent = dinero(subtotal);
+			document.getElementById('total').textContent = dinero(subtotal);
+			document.getElementById('botonPago').disabled = !carrito.length;
+		}
+		function pintarCarrito() {
+			if (!carrito.length) {
+				lista.innerHTML = '<div class="estado-vacio"><strong>Tu carrito está esperando algo especial.</strong><p>Explora nuestra colección y guarda aquí tus productos favoritos.</p><a class="boton-tienda" href="/productos">Explorar productos</a></div>';
+			resumen();
+			return;
+		}
+			lista.innerHTML = carrito.map((item, indice) => `<article class="item-carrito"><img class="item-imagen" src="${escapeHtml(item.imagen)}" alt="${escapeHtml(item.nombre)}"><div class="item-info"><h3>${escapeHtml(item.nombre)}</h3><p>${escapeHtml(item.tipo || '')}</p>${item.variante ? `<p class="item-variante">${escapeHtml(item.variante)}</p>` : ''}</div><strong class="item-precio">${dinero(item.precio * item.cantidad)}</strong><div class="item-controles"><button type="button" data-cantidad="menos" data-indice="${indice}" aria-label="Disminuir cantidad">−</button><span>${item.cantidad}</span><button type="button" data-cantidad="mas" data-indice="${indice}" aria-label="Aumentar cantidad">+</button></div><button class="item-eliminar" type="button" data-eliminar="${indice}">Eliminar</button></article>`).join('');
+			resumen();
+		}
+		document.addEventListener('click', (evento) => {
+			const cantidad = evento.target.closest('[data-cantidad]');
+			const eliminar = evento.target.closest('[data-eliminar]');
+			if (cantidad) {
+				const item = carrito[Number(cantidad.dataset.indice)];
+				item.cantidad += cantidad.dataset.cantidad === 'mas' ? 1 : -1;
+				if (item.cantidad < 1) carrito.splice(Number(cantidad.dataset.indice), 1);
+				guardar(); pintarCarrito();
+			}
+			if (eliminar) { carrito.splice(Number(eliminar.dataset.eliminar), 1); guardar(); pintarCarrito(); }
+		});
+		document.getElementById('botonPago').addEventListener('click', () => {
+			if (!carrito.length) return;
+			const numero = `AM-${Date.now().toString().slice(-6)}`;
+			const confirmacion = document.getElementById('confirmacion');
+			confirmacion.innerHTML = `<strong>Pedido ${numero} preparado.</strong><span>Tu selección quedó lista para confirmar el pago. Pronto podrás completar el proceso.</span>`;
+			confirmacion.hidden = false;
+		});
+		document.getElementById('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); });
+		async function iniciarCarrito() {
+			const antiguos = carrito.filter((item) => typeof item === 'string');
+			carrito = carrito.filter((item) => item && typeof item === 'object');
+			if (antiguos.length) {
+				try {
+					const respuesta = await fetch('/api/productos');
+					const productos = await respuesta.json();
+					antiguos.forEach((texto) => {
+						const partes = texto.split(' - ');
+						const producto = productos.find((item) => item.nombre === partes[0]);
+						if (producto) carrito.push({ id: producto.id, nombre: producto.nombre, tipo: producto.tipo, imagen: producto.imagen, precio: producto.precio, variante: partes.slice(1).join(' - '), cantidad: 1 });
+					});
+				} catch (error) { console.error('No se pudo actualizar el carrito anterior:', error); }
+			}
+			guardar();
+			pintarCarrito();
+		}
+		iniciarCarrito();
+	</script>
+</body>
+</html>
