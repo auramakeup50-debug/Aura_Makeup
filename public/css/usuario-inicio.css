@@ -1,0 +1,81 @@
+:root {
+	--inicio-cafe: #49322d;
+	--inicio-terracota: #b8745c;
+	--inicio-rosa: #d99ba5;
+	--inicio-rosa-claro: #f2d6d7;
+	--inicio-arena: #ead5c0;
+	--inicio-crema: #fffaf4;
+	--inicio-linea: #dfc5b3;
+}
+
+body {
+	background: radial-gradient(circle at 90% 6%, rgba(217, 155, 165, .27), transparent 24%), radial-gradient(circle at 4% 78%, rgba(184, 116, 92, .14), transparent 28%), linear-gradient(135deg, #fffaf8 0%, #f5e1df 58%, #fbf7f0 100%);
+}
+
+.usuario-header {
+	background: linear-gradient(105deg, rgba(73, 50, 45, .98), rgba(112, 73, 61, .96));
+	border-bottom: 0;
+	box-shadow: 0 8px 25px rgba(73, 50, 45, .14);
+}
+
+.marca { color: #fffaf4; }
+.usuario-nav a { color: #f5e8df; }
+.usuario-nav a:hover { color: #fff; }
+.boton-salir { background: var(--inicio-terracota); box-shadow: 0 4px 12px rgba(73, 50, 45, .16); }
+
+.usuario-hero {
+	border-bottom-color: var(--inicio-linea);
+	padding-bottom: 48px;
+	position: relative;
+}
+
+.usuario-hero::after {
+	background: var(--inicio-terracota);
+	bottom: -1px;
+	content: '';
+	height: 3px;
+	left: 0;
+	position: absolute;
+	width: 105px;
+}
+
+.usuario-etiqueta { color: var(--inicio-terracota); }
+.usuario-hero h1 { color: var(--inicio-cafe); }
+.usuario-hero h1 span { color: var(--inicio-terracota); }
+.usuario-hero p:last-child { color: #715f57; }
+.usuario-seccion h2 { color: var(--inicio-cafe); }
+
+.usuario-opciones { gap: 18px; }
+.opcion {
+	background: rgba(255, 250, 244, .88);
+	border-color: var(--inicio-linea);
+	box-shadow: 0 9px 22px rgba(105, 70, 58, .07);
+	overflow: hidden;
+	position: relative;
+}
+
+.opcion::before {
+	background: var(--inicio-terracota);
+	content: '';
+	height: 4px;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.opcion:nth-child(2)::before { background: var(--inicio-rosa); }
+.opcion:nth-child(3)::before { background: #9a7664; }
+.opcion:nth-child(4)::before { background: #c69b78; }
+.opcion strong { color: var(--inicio-cafe); }
+.opcion span { color: #78675e; }
+.opcion:hover {
+	background: var(--inicio-crema);
+	border-color: var(--inicio-terracota);
+	box-shadow: 0 13px 27px rgba(105, 70, 58, .13);
+}
+.opcion:nth-child(2):hover { border-color: var(--inicio-rosa); }
+
+@media (max-width: 760px) {
+	.usuario-header { background: linear-gradient(145deg, rgba(73, 50, 45, .98), rgba(112, 73, 61, .96)); }
+}
