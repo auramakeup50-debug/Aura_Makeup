@@ -56,6 +56,10 @@ app.get('/admin/kits.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin', 'kits.html'));
 });
 
+app.get('/admin/asesorias.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'admin', 'asesorias.html'));
+});
+
 app.get('/admin/usuarios.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin', 'usuarios.html'));
 });
@@ -89,6 +93,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/usuario', require('./routes/usuarioRoutes'));
 app.use('/api/productos', require('./routes/productoRoutes'));
 app.use('/api/kits', require('./routes/kitRoutes'));
+app.use('/api/asesorias', require('./routes/asesoriaRoutes'));
 app.use('/api/admin/usuarios', require('./routes/adminUsuarioRoutes'));
 app.use('/api/admin/pedidos', require('./routes/adminPedidoRoutes'));
 app.use('/api/pedidos', require('./routes/pedidoRoutes'));

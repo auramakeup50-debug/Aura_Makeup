@@ -57,7 +57,15 @@
 				<button class="boton-diagnostico" id="abrirDiagnostico" type="button">Haz tu diagnóstico <span aria-hidden="true">↗</span></button>
 			</div>
 		</section>
+
+		<section class="asesoria-seccion" aria-labelledby="asesoria-title">
+			<div class="asesoria-cabecera"><div><p class="usuario-etiqueta">Acompañamiento Aura</p><h2 id="asesoria-title">Asesoría personalizada<br><em>para tu ritual.</em></h2></div><p>Pregunta sobre maquillaje, productos, piel o cabello y recibe orientación de nuestro equipo.</p></div>
+			<div class="asesoria-metodos"><button class="asesoria-metodo" type="button" data-abrir-asesoria="chat"><span class="metodo-numero">01</span><strong>Chat con Aura</strong><small>Cuéntanos tu duda y recibe una respuesta de nuestro equipo.</small></button><button class="asesoria-metodo" type="button" data-abrir-asesoria="formulario"><span class="metodo-numero">02</span><strong>Formulario</strong><small>Déjanos una consulta detallada para orientarte mejor.</small></button></div>
+			<div class="asesoria-historial"><div class="historial-asesoria-cabecera"><h3>Mis consultas</h3><button class="boton-diagnostico secundario" id="recargarAsesorias" type="button">Actualizar</button></div><div id="listaAsesorias"><p class="asesoria-vacia">Cargando tu historial de asesorías...</p></div></div>
+		</section>
 	</main>
+
+	<div class="asesoria-modal" id="asesoriaModal" hidden><div class="asesoria-fondo" data-cerrar-asesoria></div><section class="asesoria-dialogo" role="dialog" aria-modal="true" aria-labelledby="asesoriaDialogoTitulo"><button class="diagnostico-cerrar" type="button" data-cerrar-asesoria aria-label="Cerrar asesoría">&times;</button><p class="usuario-etiqueta">Asesoría Aura</p><h2 id="asesoriaDialogoTitulo">Cuéntanos qué necesitas.</h2><p class="asesoria-metodo-activo" id="metodoAsesoriaTexto"></p><form id="formAsesoria"><input type="hidden" id="metodoAsesoria" value="chat"><label class="campo-asesoria" for="preguntaAsesoria">Tu pregunta<textarea id="preguntaAsesoria" minlength="10" required placeholder="Ejemplo: ¿Qué productos me recomiendan para un acabado natural?"></textarea></label><p class="mensaje-asesoria" id="mensajeAsesoria" role="status"></p><button class="boton-diagnostico" type="submit">Enviar consulta <span aria-hidden="true">↗</span></button></form></section></div>
 
 	<div class="diagnostico-modal" id="diagnosticoModal" hidden>
 		<div class="diagnostico-fondo" data-cerrar-diagnostico></div>
@@ -93,6 +101,21 @@
 			localStorage.removeItem('token');
 			localStorage.removeItem('usuario');
 		});
+
+		const asesoriaModal = document.getElementById('asesoriaModal');
+		const formAsesoria = document.getElementById('formAsesoria');
+		const metodoAsesoriaTexto = document.getElementById('metodoAsesoriaTexto');
+		const listaAsesorias = document.getElementById('listaAsesorias');
+		const escaparAsesoria = (valor) => String(valor ?? '').replace(/[&<>'"]/g, (caracter) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[caracter]));
+		const fechaAsesoria = (valor) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(`${valor.replace(' ', 'T')}Z`));
+		function abrirAsesoria(metodo) { document.getElementById('metodoAsesoria').value = metodo; metodoAsesoriaTexto.textContent = metodo === 'chat' ? 'Chat: una consulta breve para recibir orientación directa.' : 'Formulario: comparte todos los detalles de tu necesidad.'; document.getElementById('mensajeAsesoria').textContent = ''; asesoriaModal.hidden = false; document.body.classList.add('diagnostico-abierto'); document.getElementById('preguntaAsesoria').focus(); }
+		function pintarAsesorias(consultas) { listaAsesorias.innerHTML = consultas.length ? consultas.map((consulta) => `<article class="asesoria-consulta"><div class="consulta-meta"><span>${consulta.metodo === 'chat' ? 'Chat con Aura' : 'Formulario'}</span><b class="consulta-estado ${consulta.estado}">${consulta.estado === 'respondida' ? 'Respondida' : 'Pendiente'}</b></div><p class="consulta-fecha">${fechaAsesoria(consulta.fecha_creacion)}</p><p class="consulta-pregunta">${escaparAsesoria(consulta.pregunta)}</p>${consulta.respuesta ? `<div class="consulta-respuesta"><strong>Respuesta de Aura</strong><p>${escaparAsesoria(consulta.respuesta)}</p><small>${fechaAsesoria(consulta.fecha_respuesta)}</small></div>` : '<p class="consulta-espera">Nuestro equipo revisará tu consulta y te responderá pronto.</p>'}</article>`).join('') : '<p class="asesoria-vacia">Aún no has enviado consultas. Estamos aquí para ayudarte.</p>'; }
+		async function cargarAsesorias() { try { const respuesta = await fetch('/api/asesorias/mis-consultas', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }); if (!respuesta.ok) throw new Error('No se pudo cargar el historial'); pintarAsesorias(await respuesta.json()); } catch (error) { listaAsesorias.innerHTML = `<p class="asesoria-vacia">${error.message}</p>`; } }
+		document.querySelectorAll('[data-abrir-asesoria]').forEach((boton) => boton.addEventListener('click', () => abrirAsesoria(boton.dataset.abrirAsesoria)));
+		document.querySelectorAll('[data-cerrar-asesoria]').forEach((elemento) => elemento.addEventListener('click', () => { asesoriaModal.hidden = true; document.body.classList.remove('diagnostico-abierto'); }));
+		formAsesoria.addEventListener('submit', async (evento) => { evento.preventDefault(); const mensaje = document.getElementById('mensajeAsesoria'); mensaje.textContent = 'Enviando consulta...'; try { const respuesta = await fetch('/api/asesorias', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify({ metodo: document.getElementById('metodoAsesoria').value, pregunta: document.getElementById('preguntaAsesoria').value }) }); const datos = await respuesta.json(); if (!respuesta.ok) throw new Error(datos.mensaje); formAsesoria.reset(); asesoriaModal.hidden = true; document.body.classList.remove('diagnostico-abierto'); await cargarAsesorias(); } catch (error) { mensaje.textContent = error.message; } });
+		document.getElementById('recargarAsesorias').addEventListener('click', cargarAsesorias);
+		cargarAsesorias();
 
 		const diagnosticoModal = document.getElementById('diagnosticoModal');
 		const formularioDiagnostico = document.getElementById('formDiagnostico');

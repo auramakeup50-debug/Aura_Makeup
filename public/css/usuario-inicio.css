@@ -154,10 +154,29 @@ body {
 .recomendacion-card small { color: #806d64; display: block; font-size: .7rem; line-height: 1.35; margin-top: 5px; }
 .diagnostico-abierto { overflow: hidden; }
 
+.asesoria-seccion { border-top: 1px solid var(--inicio-linea); margin-top: 52px; padding-top: 44px; }
+.asesoria-cabecera { align-items: end; display: flex; justify-content: space-between; }
+.asesoria-cabecera h2 { color: var(--inicio-cafe); font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.3rem); font-weight: normal; line-height: 1; margin: 0; }
+.asesoria-cabecera h2 em { color: var(--inicio-terracota); font-style: italic; }
+.asesoria-cabecera > p { color: #715f57; line-height: 1.6; margin: 0; max-width: 350px; }
+.asesoria-metodos { display: grid; gap: 16px; grid-template-columns: repeat(2, 1fr); margin-top: 28px; }
+.asesoria-metodo { background: rgba(255, 250, 244, .9); border: 1px solid var(--inicio-linea); color: var(--inicio-cafe); cursor: pointer; display: flex; flex-direction: column; font: inherit; min-height: 155px; padding: 22px; text-align: left; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+.asesoria-metodo:hover { background: #fff; border-color: var(--inicio-terracota); transform: translateY(-3px); }
+.metodo-numero { color: var(--inicio-terracota); font-size: .72rem; letter-spacing: .13em; }
+.asesoria-metodo strong { font-family: Georgia, serif; font-size: 1.45rem; font-weight: normal; margin-top: auto; }
+.asesoria-metodo small { color: #78675e; line-height: 1.45; margin-top: 8px; }
+.asesoria-historial { margin-top: 35px; }
+.historial-asesoria-cabecera { align-items: center; display: flex; justify-content: space-between; }
+.historial-asesoria-cabecera h3 { color: var(--inicio-cafe); font-family: Georgia, serif; font-size: 1.5rem; font-weight: normal; margin: 0; }
+.asesoria-consulta { background: rgba(255, 250, 244, .88); border: 1px solid var(--inicio-linea); margin-top: 12px; padding: 18px; }
+.consulta-meta { align-items: center; display: flex; justify-content: space-between; }.consulta-meta > span { color: var(--inicio-terracota); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }.consulta-estado { font-size: .7rem; font-weight: normal; padding: 5px 8px; }.consulta-estado.pendiente { background: #f8e2c2; color: #916027; }.consulta-estado.respondida { background: #eadcf0; color: #70465f; }.consulta-fecha { color: #907e78; font-size: .72rem; margin: 7px 0; }.consulta-pregunta { color: var(--inicio-cafe); line-height: 1.5; margin: 10px 0 0; }.consulta-respuesta { background: #fff; border-left: 3px solid var(--inicio-terracota); margin-top: 15px; padding: 13px 15px; }.consulta-respuesta strong { color: var(--inicio-cafe); font-size: .82rem; }.consulta-respuesta p { color: #665750; line-height: 1.55; margin: 7px 0; }.consulta-respuesta small, .consulta-espera { color: #907e78; font-size: .76rem; }.asesoria-vacia { color: #806d64; font-size: .85rem; }
+.asesoria-modal[hidden] { display: none; }.asesoria-modal { align-items: center; display: flex; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 25; }.asesoria-fondo { background: rgba(48, 31, 35, .62); inset: 0; position: absolute; }.asesoria-dialogo { background: var(--inicio-crema); max-width: 600px; padding: 34px; position: relative; width: 100%; z-index: 1; }.asesoria-dialogo h2 { color: var(--inicio-cafe); font-family: Georgia, serif; font-size: 2.4rem; font-weight: normal; margin: 0; }.asesoria-metodo-activo { color: #715f57; font-size: .85rem; }.campo-asesoria { color: var(--inicio-cafe); display: grid; font-size: .82rem; font-weight: 700; gap: 7px; margin-top: 22px; }.campo-asesoria textarea { border: 1px solid var(--inicio-linea); color: var(--inicio-cafe); font: inherit; min-height: 140px; padding: 12px; resize: vertical; }.mensaje-asesoria { color: var(--inicio-terracota); font-size: .82rem; min-height: 20px; }
+
 @media (max-width: 760px) {
 	.usuario-header { background: linear-gradient(145deg, rgba(73, 50, 45, .98), rgba(112, 73, 61, .96)); }
 	.diagnostico-invitacion { grid-template-columns: 1fr; padding: 24px; }
 	.diagnostico-ornamento { height: 120px; width: 120px; }
 	.diagnostico-dialogo { padding: 27px 20px; }
 	.recomendaciones-grid { grid-template-columns: 1fr; }
+	.asesoria-cabecera { align-items: flex-start; flex-direction: column; gap: 18px; }.asesoria-metodos { grid-template-columns: 1fr; }.asesoria-dialogo { padding: 28px 22px; }
 }

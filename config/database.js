@@ -103,6 +103,22 @@ db.exec(`
 
 console.log('Tabla kits lista');
 
+db.exec(`
+    CREATE TABLE IF NOT EXISTS asesorias (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        metodo TEXT NOT NULL CHECK (metodo IN ('chat', 'formulario')),
+        pregunta TEXT NOT NULL,
+        respuesta TEXT,
+        estado TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'respondida')),
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        fecha_respuesta DATETIME,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+`);
+
+console.log('Tabla asesorias lista');
+
 const totalKits = db.prepare('SELECT COUNT(*) AS total FROM kits').get().total;
 if (totalKits === 0) {
     const insertarKit = db.prepare(`
