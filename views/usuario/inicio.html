@@ -6,10 +6,12 @@
 	<title>Mi espacio | Aura Makeup</title>
 	<link rel="stylesheet" href="/css/usuario.css">
 	<link rel="stylesheet" href="/css/usuario-inicio.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
 </head>
 <body>
 	<header class="usuario-header">
-		<a class="marca" href="/usuario/inicio.html">Aura Makeup</a>
+		<a class="marca" href="/usuario/inicio.html" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
 		<nav class="usuario-nav" aria-label="Navegación principal">
 			<a href="/usuario/perfil.html">Mi perfil</a>
 			<a href="/usuario/historial.html">Mis pedidos</a>
@@ -45,7 +47,32 @@
 				</a>
 			</div>
 		</section>
+
+		<section class="diagnostico-invitacion" aria-labelledby="diagnostico-title">
+			<div class="diagnostico-ornamento" aria-hidden="true"><span>AM</span></div>
+			<div class="diagnostico-copy">
+				<p class="usuario-etiqueta">Una guía hecha para ti</p>
+				<h2 id="diagnostico-title">Conoce lo que tu piel<br>y cabello <em>necesitan.</em></h2>
+				<p>Responde unas preguntas sobre tus preferencias y recibe recomendaciones de Aura Makeup. Es una orientación de belleza, no un diagnóstico médico.</p>
+				<button class="boton-diagnostico" id="abrirDiagnostico" type="button">Haz tu diagnóstico <span aria-hidden="true">↗</span></button>
+			</div>
+		</section>
 	</main>
+
+	<div class="diagnostico-modal" id="diagnosticoModal" hidden>
+		<div class="diagnostico-fondo" data-cerrar-diagnostico></div>
+		<section class="diagnostico-dialogo" role="dialog" aria-modal="true" aria-labelledby="diagnosticoDialogoTitulo">
+			<button class="diagnostico-cerrar" type="button" data-cerrar-diagnostico aria-label="Cerrar diagnóstico">&times;</button>
+			<div class="diagnostico-cabecera"><p class="usuario-etiqueta">Diagnóstico Aura</p><h2 id="diagnosticoDialogoTitulo">Encuentra tu próximo ritual.</h2><p id="diagnosticoProgreso">Paso 1 de 3</p></div>
+			<form id="formDiagnostico">
+				<fieldset class="pregunta-diagnostico" data-paso="1"><legend>¿Cómo sientes tu piel normalmente?</legend><label><input type="radio" name="piel" value="grasa" required><span>Grasa o con brillo</span></label><label><input type="radio" name="piel" value="seca"><span>Seca o con tirantez</span></label><label><input type="radio" name="piel" value="mixta"><span>Mixta, con zonas grasas y secas</span></label><label><input type="radio" name="piel" value="equilibrada"><span>Equilibrada y cómoda</span></label><label><input type="radio" name="piel" value="sensible"><span>Sensible o fácilmente irritable</span></label>				</fieldset>
+				<fieldset class="pregunta-diagnostico" data-paso="2" hidden><legend>¿Qué buscas principalmente?</legend><label><input type="radio" name="objetivo" value="maquillaje" required><span>Maquillaje para mi día a día</span></label><label><input type="radio" name="objetivo" value="hidratacion"><span>Hidratación y suavidad</span></label><label><input type="radio" name="objetivo" value="cabello"><span>Cuidado para mi cabello</span></label><label><input type="radio" name="objetivo" value="rutina"><span>Una rutina completa</span></label></fieldset>
+				<fieldset class="pregunta-diagnostico" data-paso="3" hidden><legend>¿Qué acabado prefieres?</legend><label><input type="radio" name="acabado" value="natural" required><span>Natural y ligero</span></label><label><input type="radio" name="acabado" value="luminoso"><span>Luminoso y radiante</span></label><label><input type="radio" name="acabado" value="definido"><span>Definido y sofisticado</span></label><label><input type="radio" name="acabado" value="capilar"><span>Suave, para mi cabello</span></label></fieldset>
+				<div class="diagnostico-navegacion"><button class="boton-diagnostico secundario" id="diagnosticoAtras" type="button" hidden>Anterior</button><button class="boton-diagnostico" id="diagnosticoSiguiente" type="button">Siguiente <span aria-hidden="true">→</span></button></div>
+			</form>
+			<div id="diagnosticoResultados" hidden><div class="resultado-cabecera"><p class="usuario-etiqueta">Tus recomendaciones Aura</p><h3>Una selección pensada para ti.</h3><p id="resultadoResumen"></p></div><div class="recomendaciones-grid" id="recomendacionesGrid"></div><button class="boton-diagnostico secundario" id="reiniciarDiagnostico" type="button">Hacerlo de nuevo</button></div>
+		</section>
+	</div>
 
 	<script>
 		if (!localStorage.getItem('token')) {
@@ -66,6 +93,68 @@
 			localStorage.removeItem('token');
 			localStorage.removeItem('usuario');
 		});
+
+		const diagnosticoModal = document.getElementById('diagnosticoModal');
+		const formularioDiagnostico = document.getElementById('formDiagnostico');
+		const preguntas = [...document.querySelectorAll('.pregunta-diagnostico')];
+		let pasoDiagnostico = 0;
+		let productosDiagnostico = [];
+		let kitsDiagnostico = [];
+		const dineroDiagnostico = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const escaparDiagnostico = (valor) => String(valor ?? '').replace(/[&<>'"]/g, (caracter) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[caracter]));
+
+		function mostrarPasoDiagnostico(indice) {
+			pasoDiagnostico = indice;
+			preguntas.forEach((pregunta, posicion) => { pregunta.hidden = posicion !== indice; });
+			document.getElementById('diagnosticoProgreso').textContent = `Paso ${indice + 1} de ${preguntas.length}`;
+			document.getElementById('diagnosticoAtras').hidden = indice === 0;
+			document.getElementById('diagnosticoSiguiente').innerHTML = indice === preguntas.length - 1 ? 'Ver recomendaciones <span aria-hidden="true">↗</span>' : 'Siguiente <span aria-hidden="true">→</span>';
+		}
+
+		function recomendarDiagnostico() {
+			const respuestas = Object.fromEntries(new FormData(formularioDiagnostico).entries());
+			const textoPreferencias = `${respuestas.piel} ${respuestas.objetivo} ${respuestas.acabado}`;
+			const puntuar = (elemento) => {
+				const textoIncluidos = elemento.tipoItem === 'kit' ? (elemento.incluidos || []).map((producto) => `${producto.nombre} ${producto.tipo} ${producto.categoria}`).join(' ') : '';
+				const texto = `${elemento.nombre} ${elemento.tipo || ''} ${elemento.descripcion || ''} ${elemento.categoria || ''} ${textoIncluidos}`.toLowerCase();
+				let puntos = 0;
+				if (respuestas.objetivo === 'maquillaje' && elemento.categoria === 'cosmeticos') puntos += 5;
+				if (respuestas.objetivo === 'cabello' && elemento.categoria === 'capilares') puntos += 7;
+				if (elemento.tipoItem === 'kit') {
+					puntos += 4;
+					if (respuestas.objetivo === 'maquillaje' && /cosmeticos|base|rubor|labial|pestañina|gloss/.test(texto)) puntos += 9;
+					if (respuestas.objetivo === 'cabello' && /capilares|cabello|perfume|gorro|cepillo/.test(texto)) puntos += 9;
+					if (respuestas.objetivo === 'rutina') puntos += 12;
+				}
+				if (respuestas.objetivo === 'hidratacion' && /hidrat|suav|aceite|base|rubor/.test(texto)) puntos += 4;
+				if (respuestas.objetivo === 'rutina' && elemento.tipoItem === 'kit') puntos += 8;
+				if (respuestas.piel === 'grasa' && /polvo|gel|mate|corrector/.test(texto)) puntos += 3;
+				if (respuestas.piel === 'seca' && /hidrat|crema|aceite|luminos|gloss/.test(texto)) puntos += 3;
+				if (respuestas.piel === 'sensible' && /liger|natural|suave/.test(texto)) puntos += 3;
+				if (respuestas.acabado === 'luminoso' && /brillo|luminos|gloss|ilumin/.test(texto)) puntos += 4;
+				if (respuestas.acabado === 'natural' && /natural|liger|suave/.test(texto)) puntos += 4;
+				if (respuestas.acabado === 'capilar' && elemento.categoria === 'capilares') puntos += 6;
+				return puntos;
+			};
+			const kitsRecomendados = kitsDiagnostico.map((kit) => ({ ...kit, tipoItem: 'kit' })).sort((a, b) => puntuar(b) - puntuar(a)).slice(0, 2);
+			const productosRecomendados = productosDiagnostico.sort((a, b) => puntuar(b) - puntuar(a)).slice(0, 2);
+			const recomendaciones = [...kitsRecomendados, ...productosRecomendados];
+			document.getElementById('resultadoResumen').textContent = `Según tus respuestas, primero seleccionamos kits completos para ${textoPreferencias.includes('cabello') || textoPreferencias.includes('capilar') ? 'tu cuidado capilar' : 'tu rutina de belleza'}, y después productos para complementar.`;
+		document.getElementById('recomendacionesGrid').innerHTML = recomendaciones.map((item) => `<article class="recomendacion-card"><img src="${escaparDiagnostico(item.imagen)}" alt="${escaparDiagnostico(item.nombre)}"><div><p>${item.tipoItem === 'kit' ? 'Kit recomendado' : escaparDiagnostico(item.tipo)}</p><h4>${escaparDiagnostico(item.nombre)}</h4><strong>${dineroDiagnostico(item.precio)}</strong><small>${item.tipoItem === 'kit' ? `${item.incluidos.length} productos incluidos` : escaparDiagnostico(item.descripcion)}</small></div></article>`).join('');
+			formularioDiagnostico.hidden = true;
+			document.getElementById('diagnosticoResultados').hidden = false;
+		}
+
+		document.getElementById('abrirDiagnostico').addEventListener('click', async () => {
+			diagnosticoModal.hidden = false;
+			document.body.classList.add('diagnostico-abierto');
+			try { const [productosRespuesta, kitsRespuesta] = await Promise.all([fetch('/api/productos'), fetch('/api/kits')]); productosDiagnostico = await productosRespuesta.json(); kitsDiagnostico = await kitsRespuesta.json(); } catch (error) { productosDiagnostico = []; kitsDiagnostico = []; }
+		});
+		document.getElementById('diagnosticoSiguiente').addEventListener('click', () => { if (!preguntas[pasoDiagnostico].querySelector('input:checked')) { preguntas[pasoDiagnostico].classList.add('pregunta-error'); return; } preguntas[pasoDiagnostico].classList.remove('pregunta-error'); if (pasoDiagnostico === preguntas.length - 1) recomendarDiagnostico(); else mostrarPasoDiagnostico(pasoDiagnostico + 1); });
+		document.getElementById('diagnosticoAtras').addEventListener('click', () => mostrarPasoDiagnostico(pasoDiagnostico - 1));
+		document.getElementById('reiniciarDiagnostico').addEventListener('click', () => { formularioDiagnostico.reset(); formularioDiagnostico.hidden = false; document.getElementById('diagnosticoResultados').hidden = true; mostrarPasoDiagnostico(0); });
+		document.addEventListener('click', (evento) => { if (evento.target.closest('[data-cerrar-diagnostico]')) { diagnosticoModal.hidden = true; document.body.classList.remove('diagnostico-abierto'); } });
+		mostrarPasoDiagnostico(0);
 	</script>
 </body>
 </html>

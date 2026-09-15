@@ -7,14 +7,17 @@
 	<title>Panel admin | Aura Makeup</title>
 	<link rel="stylesheet" href="/css/admin.css">
 	<link rel="stylesheet" href="/css/admin-dashboard.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
 </head>
 
 <body>
 	<header class="admin-header">
-		<a class="admin-brand" href="/admin/dashboard.html">Aura Makeup</a>
+		<a class="admin-brand" href="/admin/dashboard.html" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
 		<nav class="admin-nav" aria-label="Navegación administrativa">
 			<a href="/admin/usuarios.html">Usuarios</a>
 			<a href="/admin/productos.html">Productos</a>
+			<a href="/admin/kits.html">Kits</a>
 			<a href="/admin/pedidos.html">Pedidos</a>
 			<a class="admin-logout" href="/login" id="cerrarSesion">Cerrar sesión</a>
 		</nav>
@@ -35,7 +38,7 @@
 					<span>Productos registrados</span>
 				</div>
 				<div class="admin-stat">
-					<strong>0</strong>
+					<strong id="totalPedidosPendientes">0</strong>
 					<span>Pedidos pendientes</span>
 				</div>
 				<div class="admin-stat">
@@ -55,6 +58,10 @@
 				<a class="admin-action" href="/admin/pedidos.html">
 					<strong>Revisar pedidos</strong>
 					<span>Consulta y actualiza las compras.</span>
+				</a>
+				<a class="admin-action" href="/admin/kits.html">
+					<strong>Gestionar kits</strong>
+					<span>Crea rutinas completas para la tienda.</span>
 				</a>
 				<a class="admin-action" href="/admin/usuarios.html">
 					<strong>Gestionar usuarios</strong>
@@ -169,10 +176,32 @@
 			}
 		}
 
+		async function cargarTotalPedidosPendientes() {
+			const totalPedidos = document.getElementById('totalPedidosPendientes');
+			try {
+				const respuesta = await fetch('/api/admin/pedidos', {
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
+				if (respuesta.status === 401) {
+					localStorage.removeItem('token');
+					localStorage.removeItem('usuario');
+					window.location.replace('/login');
+					return;
+				}
+				if (!respuesta.ok) throw new Error('No se pudieron cargar los pedidos');
+				const pedidos = await respuesta.json();
+				totalPedidos.textContent = pedidos.filter((pedido) => ['pendiente', 'confirmado', 'enviado'].includes(pedido.estado)).length;
+			} catch (error) {
+				console.error('Error al cargar pedidos:', error);
+				totalPedidos.textContent = '0';
+			}
+		}
+
 
 		// Ejecutar al cargar el dashboard
 		cargarTotalUsuarios();
 		cargarTotalProductos();
+		cargarTotalPedidosPendientes();
 
 
 		// =====================================

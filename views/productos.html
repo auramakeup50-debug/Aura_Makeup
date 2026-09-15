@@ -8,13 +8,15 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/productos.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
 </head>
 <body>
 	<header class="catalogo-header">
-		<a class="marca" href="/">Aura <span>Makeup</span></a>
+		<a class="marca" href="/" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
 		<nav aria-label="Navegación principal">
-			<a href="/usuario/inicio.html">Mi espacio</a>
-			<a class="enlace-carrito" href="/usuario/carrito.html" aria-label="Abrir carrito">
+			<a href="/usuario/inicio.html" data-requiere-cuenta>Mi espacio</a>
+			<a class="enlace-carrito" href="/usuario/carrito.html" aria-label="Abrir carrito" data-requiere-cuenta>
 				<span aria-hidden="true">Bag</span>
 				<strong id="contadorCarrito">0</strong>
 			</a>
@@ -32,6 +34,7 @@
 		</section>
 
 		<div class="catalogo-controles">
+			<label class="buscador-productos"><span class="sr-only">Buscar productos</span><span class="icono-busqueda" aria-hidden="true"></span><input id="buscarProducto" type="search" placeholder="Buscar productos" autocomplete="off"></label>
 			<div class="filtros" role="group" aria-label="Filtrar productos">
 				<button class="filtro activo" type="button" data-filtro="todos">Todo</button>
 				<button class="filtro" type="button" data-filtro="cosmeticos">Cosméticos</button>
@@ -39,6 +42,8 @@
 			</div>
 			<p class="contador-productos"><span id="cantidadProductos">16</span> esenciales para ti</p>
 		</div>
+		<p class="sin-resultados" id="sinResultados" hidden>No encontramos productos con esa búsqueda.</p>
+		<section class="kits-catalogo" id="seccionKits" hidden aria-labelledby="kitsTitulo"><div class="categoria-cabecera"><div><p class="eyebrow">03 / rutinas completas</p><h2 id="kitsTitulo">Kits de productos</h2></div><p>Todo lo que necesitas, reunido en una sola selección para simplificar tu ritual.</p></div><div class="kits-grid" id="gridKits"></div></section>
 
 		<section class="categoria" data-categoria="cosmeticos" aria-labelledby="cosmeticos-title">
 			<div class="categoria-cabecera">
@@ -64,6 +69,7 @@
 	</main>
 
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+	<div class="cuenta-modal" id="cuentaModal" hidden><div class="cuenta-fondo" data-cerrar-cuenta></div><section class="cuenta-dialogo" role="dialog" aria-modal="true" aria-labelledby="cuentaTitulo"><button class="cuenta-cerrar" type="button" data-cerrar-cuenta aria-label="Cerrar">&times;</button><p class="eyebrow">Un momento, Aura</p><h2 id="cuentaTitulo">Necesitas una cuenta</h2><p>Regístrate o inicia sesión para guardar productos, revisar tu carrito, consultar pedidos y completar tus compras.</p><div class="cuenta-acciones"><a class="boton-cuenta boton-cuenta-principal" href="/registro">Registrarme</a><a class="boton-cuenta boton-cuenta-ligero" href="/login">Iniciar sesión</a></div></section></div>
 
 	<div class="modal-producto" id="modalProducto" hidden>
 		<div class="modal-fondo" data-cerrar-modal></div>
@@ -102,21 +108,56 @@
 		];
 
 		let carrito = JSON.parse(localStorage.getItem('auraCarrito') || '[]');
+		let kits = [];
+		const tieneCuenta = Boolean(localStorage.getItem('token'));
+		const cuentaModal = document.getElementById('cuentaModal');
+		document.body.classList.toggle('modo-invitado', !tieneCuenta);
+		function mostrarCuenta(evento) { if (tieneCuenta) return true; evento?.preventDefault(); cuentaModal.hidden = false; document.body.classList.add('modal-abierto'); return false; }
+		document.querySelectorAll('[data-requiere-cuenta]').forEach((enlace) => enlace.addEventListener('click', mostrarCuenta));
+		document.querySelector('[data-cerrar-cuenta]').addEventListener('click', () => { cuentaModal.hidden = true; document.body.classList.remove('modal-abierto'); });
 		const dinero = (valor) => `$${valor.toLocaleString('es-CO')}`;
 		function agregarAlCarrito(producto, variante = '') {
+			if (!mostrarCuenta()) return;
 			const existente = carrito.find((item) => item.id === producto.id && item.variante === variante);
 			if (existente) existente.cantidad += 1;
 			else carrito.push({ id: producto.id, nombre: producto.nombre, tipo: producto.tipo, imagen: producto.imagen, precio: producto.precio, variante, cantidad: 1 });
 			actualizarCarrito();
 		}
-		const formatoNombre = (producto) => `<article class="producto-card"><div class="producto-imagen"><img src="${producto.imagen}" alt="${producto.tipo} ${producto.nombre}" loading="lazy"><span class="producto-emoji" aria-hidden="true">${producto.emoji}</span><button class="boton-agregar" type="button" data-producto="${producto.nombre}" aria-label="Agregar ${producto.nombre} al carrito">+</button></div><div class="producto-info"><p class="producto-tipo">${producto.tipo}</p><h3>${producto.nombre}</h3><p class="producto-precio">${dinero(producto.precio)}</p><p class="producto-descripcion">${producto.descripcion}</p><button class="boton-detalle" type="button" data-detalle="${producto.nombre}">Ver producto</button></div></article>`;
+		function agregarKitAlCarrito(kit) {
+			if (!mostrarCuenta()) return;
+			const existente = carrito.find((item) => item.tipoItem === 'kit' && item.id === `kit-${kit.id}`);
+			if (existente) existente.cantidad += 1;
+			else carrito.push({ id: `kit-${kit.id}`, tipoItem: 'kit', nombre: kit.nombre, tipo: 'Kit de productos', imagen: kit.imagen, precio: kit.precio, descripcion: kit.descripcion, incluidos: kit.incluidos, cantidad: 1 });
+			actualizarCarrito();
+			const toast = document.getElementById('toast');
+			toast.textContent = `${kit.nombre} se agregó a tu carrito`;
+			toast.classList.add('visible');
+			setTimeout(() => toast.classList.remove('visible'), 2200);
+		}
+		function renderizarKits() {
+			const seccion = document.getElementById('seccionKits');
+			seccion.hidden = !kits.length;
+			document.getElementById('gridKits').innerHTML = kits.map((kit) => `<article class="kit-card"><div class="kit-imagen"><img src="${kit.imagen}" alt="${kit.nombre}" loading="lazy"><span class="kit-etiqueta">Kit completo</span></div><div class="kit-info"><p class="producto-tipo">${kit.incluidos.length} productos incluidos</p><h3>${kit.nombre}</h3><p class="kit-descripcion">${kit.descripcion}</p><ul class="kit-incluidos">${kit.incluidos.map((producto) => `<li>${producto.nombre}</li>`).join('')}</ul><div class="kit-pie"><strong>${dinero(kit.precio)}</strong>${tieneCuenta ? `<button class="boton-kit" type="button" data-kit="${kit.id}">Agregar kit</button>` : '<span class="kit-solo-lectura">Inicia sesión para comprar</span>'}</div></div></article>`).join('');
+		}
+		const formatoNombre = (producto) => `<article class="producto-card"><div class="producto-imagen"><img src="${producto.imagen}" alt="${producto.tipo} ${producto.nombre}" loading="lazy"><span class="producto-emoji" aria-hidden="true">${producto.emoji}</span>${tieneCuenta ? `<button class="boton-agregar" type="button" data-producto="${producto.nombre}" aria-label="Agregar ${producto.nombre} al carrito">+</button>` : ''}</div><div class="producto-info"><p class="producto-tipo">${producto.tipo}</p><h3>${producto.nombre}</h3><p class="producto-precio">${dinero(producto.precio)}</p><p class="producto-descripcion">${producto.descripcion}</p><button class="boton-detalle" type="button" data-detalle="${producto.nombre}">Ver producto</button></div></article>`;
 
-		function renderProductos(filtro = 'todos') {
-			const visibles = filtro === 'todos' ? productos : productos.filter((producto) => producto.categoria === filtro);
+		let filtroActual = 'todos';
+		let consultaActual = '';
+		const normalizar = (valor) => String(valor).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+		function renderProductos(filtro = filtroActual) {
+			filtroActual = filtro;
+			const termino = normalizar(consultaActual.trim());
+			const visibles = productos.filter((producto) => {
+				const coincideCategoria = filtro === 'todos' || producto.categoria === filtro;
+				const textoProducto = normalizar(`${producto.nombre} ${producto.tipo} ${producto.descripcion}`);
+				return coincideCategoria && (!termino || textoProducto.includes(termino));
+			});
 			document.getElementById('gridCosmeticos').innerHTML = visibles.filter((producto) => producto.categoria === 'cosmeticos').map(formatoNombre).join('');
 			document.getElementById('gridCapilares').innerHTML = visibles.filter((producto) => producto.categoria === 'capilares').map(formatoNombre).join('');
 			document.querySelector('[data-categoria="cosmeticos"]').hidden = !visibles.some((producto) => producto.categoria === 'cosmeticos');
 			document.querySelector('[data-categoria="capilares"]').hidden = !visibles.some((producto) => producto.categoria === 'capilares');
+		document.getElementById('sinResultados').hidden = visibles.length > 0;
 			document.getElementById('cantidadProductos').textContent = visibles.length;
 		}
 
@@ -130,6 +171,7 @@
 
 		function abrirDetalle(producto) {
 			productoSeleccionado = producto;
+			document.getElementById('modalAgregar').hidden = !tieneCuenta;
 			document.getElementById('modalImagen').src = producto.imagen;
 			document.getElementById('modalImagen').alt = `${producto.tipo} ${producto.nombre}`;
 			document.getElementById('modalTipo').textContent = producto.tipo;
@@ -156,6 +198,8 @@
 		}
 
 		document.addEventListener('click', (evento) => {
+			const botonKit = evento.target.closest('[data-kit]');
+			if (botonKit) { agregarKitAlCarrito(kits.find((kit) => kit.id === Number(botonKit.dataset.kit))); return; }
 			const botonDetalle = evento.target.closest('.boton-detalle');
 			if (botonDetalle) {
 				const producto = productos.find((item) => item.nombre === botonDetalle.dataset.detalle);
@@ -179,6 +223,11 @@
 
 		document.addEventListener('keydown', (evento) => {
 			if (evento.key === 'Escape' && !modal.hidden) cerrarDetalle();
+		});
+
+		document.getElementById('buscarProducto').addEventListener('input', (evento) => {
+			consultaActual = evento.target.value;
+			renderProductos();
 		});
 
 		document.querySelectorAll('.filtro').forEach((boton) => boton.addEventListener('click', () => {
@@ -214,8 +263,12 @@
 			renderProductos();
 			actualizarCarrito();
 		}
+		async function cargarKits() {
+			try { const respuesta = await fetch('/api/kits'); if (!respuesta.ok) throw new Error('No se pudieron cargar los kits'); kits = await respuesta.json(); renderizarKits(); } catch (error) { console.error(error); }
+		}
 
 		cargarProductos();
+		cargarKits();
 	</script>
 </body>
 </html>

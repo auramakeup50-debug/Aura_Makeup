@@ -8,10 +8,12 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/carrito.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
 </head>
 <body>
 	<header class="carrito-header">
-		<a class="marca-carrito" href="/usuario/inicio.html">Aura <span>Makeup</span></a>
+		<a class="marca-carrito" href="/usuario/inicio.html" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
 		<nav class="carrito-nav" aria-label="Navegación de cuenta">
 			<a href="/productos">Seguir comprando</a>
 			<a href="/usuario/perfil.html">Mi perfil</a>
@@ -101,7 +103,7 @@
 			resumen();
 			return;
 		}
-			lista.innerHTML = carrito.map((item, indice) => `<article class="item-carrito"><img class="item-imagen" src="${escapeHtml(item.imagen)}" alt="${escapeHtml(item.nombre)}"><div class="item-info"><h3>${escapeHtml(item.nombre)}</h3><p>${escapeHtml(item.tipo || '')}</p>${item.variante ? `<p class="item-variante">${escapeHtml(item.variante)}</p>` : ''}</div><strong class="item-precio">${dinero(item.precio * item.cantidad)}</strong><div class="item-controles"><button type="button" data-cantidad="menos" data-indice="${indice}" aria-label="Disminuir cantidad">−</button><span>${item.cantidad}</span><button type="button" data-cantidad="mas" data-indice="${indice}" aria-label="Aumentar cantidad">+</button></div><button class="item-eliminar" type="button" data-eliminar="${indice}">Eliminar</button></article>`).join('');
+			lista.innerHTML = carrito.map((item, indice) => `<article class="item-carrito"><img class="item-imagen" src="${escapeHtml(item.imagen)}" alt="${escapeHtml(item.nombre)}"><div class="item-info"><h3>${escapeHtml(item.nombre)}</h3><p>${escapeHtml(item.tipo || '')}</p>${item.tipoItem === 'kit' ? `<p class="item-variante">Incluye: ${escapeHtml((item.incluidos || []).map((producto) => producto.nombre).join(', '))}</p>` : item.variante ? `<p class="item-variante">${escapeHtml(item.variante)}</p>` : ''}</div><strong class="item-precio">${dinero(item.precio * item.cantidad)}</strong><div class="item-controles"><button type="button" data-cantidad="menos" data-indice="${indice}" aria-label="Disminuir cantidad">−</button><span>${item.cantidad}</span><button type="button" data-cantidad="mas" data-indice="${indice}" aria-label="Aumentar cantidad">+</button></div><button class="item-eliminar" type="button" data-eliminar="${indice}">Eliminar</button></article>`).join('');
 			resumen();
 		}
 		document.addEventListener('click', (evento) => {

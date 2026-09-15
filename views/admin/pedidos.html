@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pedidos | Panel admin</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/admin-pedidos.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
+</head>
+<body>
+	<header class="pedidos-header">
+		<a class="pedidos-marca" href="/admin/dashboard.html" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
+		<nav class="pedidos-nav" aria-label="Navegación administrativa">
+			<a href="/admin/usuarios.html">Usuarios</a><a href="/admin/productos.html">Productos</a><a href="/admin/kits.html">Kits</a><a href="/admin/pedidos.html">Pedidos</a><a class="pedidos-salir" href="/login" id="cerrarSesion">Cerrar sesión</a>
+		</nav>
+	</header>
+	<main class="pedidos-main">
+		<section class="pedidos-intro"><div><p class="pedidos-kicker">Administración / operaciones</p><h1>Pedidos</h1></div><p>Supervisa cada compra, actualiza su recorrido y mantén al día las entregas de Aura Makeup.</p></section>
+		<section class="pedidos-resumen" aria-label="Resumen de pedidos"><div class="resumen-card"><strong id="totalPedidos">0</strong><span>Pedidos registrados</span></div><div class="resumen-card"><strong id="pendientes">0</strong><span>Pendientes de gestión</span></div><div class="resumen-card"><strong id="entregados">0</strong><span>Entregados</span></div></section>
+		<section class="pedidos-panel" aria-labelledby="listaPedidosTitulo">
+			<div class="panel-cabecera"><h2 id="listaPedidosTitulo">Todas las compras</h2><div class="controles-pedidos"><label><span class="sr-only">Buscar pedido</span><input id="buscarPedido" type="search" placeholder="Número o usuario"></label><label><span class="sr-only">Filtrar estado</span><select id="filtroEstado"><option value="todos">Todos los estados</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="enviado">Enviado</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select></label></div></div>
+			<p class="mensaje-pedidos" id="mensajePedidos" role="status"></p>
+			<table class="tabla-pedidos"><thead><tr><th>Pedido</th><th>Usuario</th><th>Compra</th><th>Estado</th><th>Gestión</th></tr></thead><tbody id="tablaPedidos"></tbody></table>
+		</section>
+	</main>
+	<div class="detalle-modal" id="detalleModal" hidden><div class="detalle-fondo" data-cerrar-detalle></div><section class="detalle-contenido" role="dialog" aria-modal="true" aria-labelledby="detalleTitulo"><button class="detalle-cerrar" type="button" data-cerrar-detalle aria-label="Cerrar detalle">&times;</button><p class="pedidos-kicker">Detalle de compra</p><h2 id="detalleTitulo"></h2><p class="detalle-meta" id="detalleMeta"></p><div id="detalleProductos"></div><div class="detalle-datos" id="detalleDatos"></div></section></div>
+	<script>
+		const token = localStorage.getItem('token');
+		const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+		if (!token || !usuario || usuario.rol !== 'admin') window.location.replace('/login');
+		let pedidos = [];
+		const $ = (id) => document.getElementById(id);
+		const estados = { pendiente: 'Pendiente', confirmado: 'Confirmado', enviado: 'Enviado', entregado: 'Entregado', cancelado: 'Cancelado' };
+		const dinero = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const fecha = (valor) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(`${valor.replace(' ', 'T')}Z`));
+		const escapar = (valor) => String(valor ?? '').replace(/[&<>'"]/g, (caracter) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[caracter]));
+		async function peticion(url, opciones = {}) { const respuesta = await fetch(url, { ...opciones, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(opciones.headers || {}) } }); if (respuesta.status === 401 || respuesta.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('usuario'); window.location.replace('/login'); return null; } const datos = await respuesta.json(); if (!respuesta.ok) throw new Error(datos.mensaje || 'No se pudo completar la operación.'); return datos; }
+		function pintarResumen() { $('totalPedidos').textContent = pedidos.length; $('pendientes').textContent = pedidos.filter((pedido) => ['pendiente', 'confirmado', 'enviado'].includes(pedido.estado)).length; $('entregados').textContent = pedidos.filter((pedido) => pedido.estado === 'entregado').length; }
+		function pintarPedidos() { const consulta = $('buscarPedido').value.toLowerCase().trim(); const estado = $('filtroEstado').value; const visibles = pedidos.filter((pedido) => (!consulta || `${pedido.numero} ${pedido.usuario_nombre} ${pedido.usuario_correo}`.toLowerCase().includes(consulta)) && (estado === 'todos' || pedido.estado === estado)); $('tablaPedidos').innerHTML = visibles.length ? visibles.map((pedido) => `<tr><td><div class="pedido-numero">${escapar(pedido.numero)}</div><div class="pedido-fecha">${fecha(pedido.fecha_pedido)}</div></td><td><strong>${escapar(pedido.usuario_nombre)}</strong><div class="pedido-correo">${escapar(pedido.usuario_correo)}</div></td><td>${pedido.productos.reduce((total, producto) => total + Number(producto.cantidad), 0)} productos<div class="pedido-correo">${dinero(pedido.total)}</div></td><td><span class="estado estado-${escapar(pedido.estado)}">${estados[pedido.estado] || escapar(pedido.estado)}</span></td><td><div class="acciones-pedido"><select class="estado-select" data-estado="${pedido.id}" aria-label="Cambiar estado de ${escapar(pedido.numero)}">${Object.entries(estados).map(([clave, texto]) => `<option value="${clave}" ${clave === pedido.estado ? 'selected' : ''}>${texto}</option>`).join('')}</select><button class="boton-detalle" type="button" data-detalle="${pedido.id}">Ver detalle</button></div></td></tr>`).join('') : '<tr><td class="pedidos-vacio" colspan="5">No hay pedidos que coincidan con la búsqueda.</td></tr>'; }
+		function abrirDetalle(pedido) { $('detalleTitulo').textContent = `Pedido ${pedido.numero}`; $('detalleMeta').textContent = `${fecha(pedido.fecha_pedido)} · ${estados[pedido.estado] || pedido.estado}`; $('detalleProductos').innerHTML = pedido.productos.map((producto) => `<div class="detalle-linea"><img src="${escapar(producto.imagen)}" alt="${escapar(producto.nombre)}"><div><strong>${escapar(producto.nombre)}</strong><span>${escapar(producto.variante || producto.tipo || '')} · Cantidad: ${producto.cantidad} · ${dinero(producto.precio)} c/u</span></div><b>${dinero(producto.precio * producto.cantidad)}</b></div>`).join(''); $('detalleDatos').innerHTML = `<strong>Cliente</strong><br>${escapar(pedido.usuario_nombre)} · ${escapar(pedido.usuario_correo)}<br><br><strong>Entrega</strong><br>Recibe: ${escapar(pedido.nombre_receptor)}<br>Dirección: ${escapar(pedido.direccion)}<br>Fecha máxima: ${escapar(pedido.fecha_maxima)}<br>Método de pago: ${escapar(pedido.metodo_pago)}<br><br><strong>Total: ${dinero(pedido.total)}</strong>`; $('detalleModal').hidden = false; document.body.style.overflow = 'hidden'; }
+		async function cargarPedidos() { try { pedidos = await peticion('/api/admin/pedidos'); pintarResumen(); pintarPedidos(); } catch (error) { $('mensajePedidos').textContent = error.message; } }
+		$('buscarPedido').addEventListener('input', pintarPedidos); $('filtroEstado').addEventListener('change', pintarPedidos);
+		document.addEventListener('change', async (evento) => { const selector = evento.target.closest('[data-estado]'); if (!selector) return; try { await peticion(`/api/admin/pedidos/${selector.dataset.estado}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: selector.value }) }); await cargarPedidos(); $('mensajePedidos').textContent = 'Estado actualizado correctamente.'; } catch (error) { $('mensajePedidos').textContent = error.message; await cargarPedidos(); } });
+		document.addEventListener('click', (evento) => { const boton = evento.target.closest('[data-detalle]'); if (boton) abrirDetalle(pedidos.find((pedido) => pedido.id === Number(boton.dataset.detalle))); if (evento.target.closest('[data-cerrar-detalle]')) { $('detalleModal').hidden = true; document.body.style.overflow = ''; } });
+		document.addEventListener('keydown', (evento) => { if (evento.key === 'Escape') { $('detalleModal').hidden = true; document.body.style.overflow = ''; } });
+		$('cerrarSesion').addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('usuario'); }); cargarPedidos();
+	</script>
+</body>
+</html>

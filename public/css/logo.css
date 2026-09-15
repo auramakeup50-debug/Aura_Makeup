@@ -1,0 +1,30 @@
+.logo-imagen {
+	display: block;
+	height: 54px;
+	object-fit: contain;
+	width: 126px;
+}
+
+.auth-brand-logo {
+	display: block;
+	height: 76px;
+	object-fit: contain;
+	width: 178px;
+}
+
+.inicio-marca .logo-imagen {
+	height: 58px;
+	width: 136px;
+}
+
+@media (max-width: 640px) {
+	.logo-imagen {
+		height: 46px;
+		width: 108px;
+	}
+
+	.auth-brand-logo {
+		height: 62px;
+		width: 146px;
+	}
+}

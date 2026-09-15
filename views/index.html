@@ -3,17 +3,33 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Aura Makeup</title>
+	<title>Aura Makeup | Belleza a tu manera</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/css/index.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
 </head>
 <body>
+	<header class="inicio-header">
+		<a class="inicio-marca" href="/" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
+	</header>
 	<main>
-		<h1>Aura Makeup</h1>
-		<p>Descubre tu estilo y realza tu belleza.</p>
-		<nav class="acciones" aria-label="Acceso a la cuenta">
-			<a class="boton boton-principal" href="/login">Iniciar sesión</a>
-			<a class="boton boton-secundario" href="/registro">Registrarse</a>
-		</nav>
+		<section class="inicio-hero">
+			<div class="hero-copy">
+				<p class="eyebrow">Aura Makeup / belleza cotidiana</p>
+				<h1>Tu belleza,<br><em>a tu manera.</em></h1>
+				<p class="hero-texto">Descubre fórmulas luminosas, tonos que hablan de ti y pequeños rituales para sentirte bien en cada detalle.</p>
+				<div class="hero-acciones"><a class="boton boton-principal" href="/catalogo-publico">Explorar productos</a><a class="boton boton-ligero" href="/login">Iniciar sesión</a><a class="boton boton-ligero" href="/registro">Registrarse</a></div>
+				<p class="acceso-libre">Puedes explorar el catálogo y consultar precios sin registrarte.</p>
+			</div>
+			<div class="hero-composicion" aria-label="Colección de productos Aura Makeup"><div class="hero-orbita orbita-grande"></div><div class="hero-orbita orbita-pequena"></div><div class="hero-etiqueta">curated<br><strong>beauty</strong></div><div class="hero-inicial">A<span>M</span></div></div>
+		</section>
+		<section class="inicio-seccion" aria-labelledby="descubre-titulo">
+			<div class="seccion-cabecera"><div><p class="eyebrow">01 / empieza por aquí</p><h2 id="descubre-titulo">Un ritual que<br><em>se parece a ti.</em></h2></div></div>
+			<div class="inicio-categorias"><div class="categoria-destacada cosmeticos"><span>01</span><strong>Rostro<br>y color</strong><small>Texturas ligeras y tonos luminosos</small></div><div class="categoria-destacada capilares"><span>02</span><strong>Cuidado<br>capilar</strong><small>Pequeños gestos para todos los días</small></div><div class="categoria-destacada comunidad"><span>03</span><strong>Catálogo<br>público</strong><small>Consulta productos, precios y tonos libremente</small></div></div>
+		</section>
 	</main>
 </body>
 </html>

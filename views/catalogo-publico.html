@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Catálogo público | Aura Makeup</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/catalogo-publico.css">
+	<link rel="stylesheet" href="/css/logo.css">
+	<link rel="icon" href="/images/aura-logo.svg" type="image/svg+xml">
+</head>
+<body>
+	<header class="catalogo-header">
+		<a class="marca" href="/" aria-label="Aura Makeup"><img class="logo-imagen" src="/images/aura-logo.svg" alt="Aura Makeup"></a>
+		<div class="acceso"><span>Catálogo público</span><a href="/login">Iniciar sesión</a><a href="/registro">Registrarse</a></div>
+	</header>
+	<main>
+		<section class="catalogo-hero"><div><p class="eyebrow">Explora sin registrarte</p><h1>Conoce tu próximo<br><em>ritual favorito.</em></h1><p class="hero-texto">Consulta productos, precios, descripciones y tonos. Para comprar solo necesitas crear tu cuenta.</p></div><div class="hero-sello" aria-hidden="true"><span>AM</span><small>public edit</small></div></section>
+		<div class="catalogo-controles"><label class="buscador"><span class="sr-only">Buscar productos</span><span class="icono-busqueda" aria-hidden="true"></span><input id="buscarProducto" type="search" placeholder="Buscar productos" autocomplete="off"></label><div class="filtros" role="group" aria-label="Filtrar productos"><button class="filtro activo" type="button" data-filtro="todos">Todo</button><button class="filtro" type="button" data-filtro="cosmeticos">Cosméticos</button><button class="filtro" type="button" data-filtro="capilares">Cuidado capilar</button></div><p class="contador"><span id="cantidadProductos">0</span> esenciales</p></div>
+		<p class="sin-resultados" id="sinResultados" hidden>No encontramos productos con esa búsqueda.</p>
+		<section class="categoria" data-categoria="cosmeticos"><div class="categoria-cabecera"><div><p class="eyebrow">01 / rostro y color</p><h2>Productos cosméticos</h2></div><p>Texturas ligeras, tonos que hablan de ti y ese pequeño gesto que cambia todo.</p></div><div class="productos-grid" id="gridCosmeticos"></div></section>
+		<section class="categoria" data-categoria="capilares"><div class="categoria-cabecera"><div><p class="eyebrow">02 / cuidado diario</p><h2>Productos capilares</h2></div><p>Pequeños rituales para que tu cabello se sienta tan bien como se ve.</p></div><div class="productos-grid" id="gridCapilares"></div></section>
+	</main>
+	<div class="detalle-modal" id="detalleModal" hidden><div class="detalle-fondo" data-cerrar-detalle></div><section class="detalle-contenido" role="dialog" aria-modal="true" aria-labelledby="detalleTitulo"><button class="detalle-cerrar" type="button" data-cerrar-detalle aria-label="Cerrar detalle">&times;</button><div class="detalle-imagen"><img id="detalleImagen" src="" alt=""></div><div class="detalle-cuerpo"><p class="producto-tipo" id="detalleTipo"></p><h2 id="detalleTitulo"></h2><p class="detalle-precio" id="detallePrecio"></p><p id="detalleDescripcion"></p><div class="tonos" id="detalleTonos"></div><a class="boton-cuenta" href="/registro">Crear cuenta para comprar</a></div></section></div>
+	<script>
+		let productos = [];
+		let filtroActual = 'todos';
+		let consultaActual = '';
+		const $ = (id) => document.getElementById(id);
+		const dinero = (valor) => `$${Number(valor).toLocaleString('es-CO')}`;
+		const normalizar = (valor) => String(valor).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+		const escapar = (valor) => String(valor ?? '').replace(/[&<>'"]/g, (caracter) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[caracter]));
+		function tarjeta(producto) { return `<article class="producto-card"><div class="producto-imagen"><img src="${escapar(producto.imagen)}" alt="${escapar(producto.tipo)} ${escapar(producto.nombre)}" loading="lazy"><span class="producto-emoji" aria-hidden="true">${escapar(producto.emoji)}</span></div><div class="producto-info"><p class="producto-tipo">${escapar(producto.tipo)}</p><h3>${escapar(producto.nombre)}</h3><p class="producto-precio">${dinero(producto.precio)}</p><p class="producto-descripcion">${escapar(producto.descripcion)}</p><button class="boton-detalle" type="button" data-detalle="${producto.id}">Ver tonos y detalles</button></div></article>`; }
+		function renderizar() { const termino = normalizar(consultaActual.trim()); const visibles = productos.filter((producto) => (filtroActual === 'todos' || producto.categoria === filtroActual) && (!termino || normalizar(`${producto.nombre} ${producto.tipo} ${producto.descripcion}`).includes(termino))); $('gridCosmeticos').innerHTML = visibles.filter((producto) => producto.categoria === 'cosmeticos').map(tarjeta).join(''); $('gridCapilares').innerHTML = visibles.filter((producto) => producto.categoria === 'capilares').map(tarjeta).join(''); document.querySelector('[data-categoria="cosmeticos"]').hidden = !visibles.some((producto) => producto.categoria === 'cosmeticos'); document.querySelector('[data-categoria="capilares"]').hidden = !visibles.some((producto) => producto.categoria === 'capilares'); $('cantidadProductos').textContent = visibles.length; $('sinResultados').hidden = Boolean(visibles.length); }
+		function abrirDetalle(producto) { $('detalleImagen').src = producto.imagen; $('detalleImagen').alt = `${producto.tipo} ${producto.nombre}`; $('detalleTipo').textContent = producto.tipo; $('detalleTitulo').textContent = producto.nombre; $('detallePrecio').textContent = dinero(producto.precio); $('detalleDescripcion').textContent = producto.descripcion; $('detalleTonos').innerHTML = producto.opciones ? `<strong>${escapar(producto.opciones.etiqueta)}</strong><div>${producto.opciones.valores.map((valor) => `<span>${escapar(valor)}</span>`).join('')}</div>` : '<strong>Presentación</strong><div><span>Producto sin variantes</span></div>'; $('detalleModal').hidden = false; document.body.classList.add('modal-abierto'); }
+		$('buscarProducto').addEventListener('input', (evento) => { consultaActual = evento.target.value; renderizar(); });
+		document.querySelectorAll('.filtro').forEach((boton) => boton.addEventListener('click', () => { document.querySelector('.filtro.activo').classList.remove('activo'); boton.classList.add('activo'); filtroActual = boton.dataset.filtro; renderizar(); }));
+		document.addEventListener('click', (evento) => { const boton = evento.target.closest('[data-detalle]'); if (boton) abrirDetalle(productos.find((producto) => producto.id === Number(boton.dataset.detalle))); if (evento.target.closest('[data-cerrar-detalle]')) { $('detalleModal').hidden = true; document.body.classList.remove('modal-abierto'); } });
+		document.addEventListener('keydown', (evento) => { if (evento.key === 'Escape') { $('detalleModal').hidden = true; document.body.classList.remove('modal-abierto'); } });
+		async function cargarProductos() { try { const respuesta = await fetch('/api/productos'); if (!respuesta.ok) throw new Error('No se pudo cargar el catálogo'); productos = await respuesta.json(); renderizar(); } catch (error) { $('sinResultados').hidden = false; $('sinResultados').textContent = error.message; } }
+		cargarProductos();
+	</script>
+</body>
+</html>

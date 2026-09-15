@@ -88,4 +88,42 @@ db.exec(`
 
 console.log('Tabla pedidos lista');
 
+db.exec(`
+    CREATE TABLE IF NOT EXISTS kits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        descripcion TEXT NOT NULL,
+        precio INTEGER NOT NULL CHECK (precio >= 0),
+        imagen TEXT NOT NULL,
+        activo INTEGER NOT NULL DEFAULT 1 CHECK (activo IN (0, 1)),
+        productos TEXT NOT NULL DEFAULT '[]',
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+console.log('Tabla kits lista');
+
+const totalKits = db.prepare('SELECT COUNT(*) AS total FROM kits').get().total;
+if (totalKits === 0) {
+    const insertarKit = db.prepare(`
+        INSERT INTO kits (nombre, descripcion, precio, imagen, activo, productos)
+        VALUES (?, ?, ?, ?, 1, ?)
+    `);
+    insertarKit.run(
+        'Kit de maquillaje Glam Aura',
+        'Un kit completo para crear looks naturales o glamurosos, ideal para el día a día o para ocasiones especiales.',
+        160000,
+        '/images/kits/glam-aura.svg',
+        JSON.stringify([2, 7, 3, 9])
+    );
+    insertarKit.run(
+        'Kit Beauty Glow: maquillaje y cabello',
+        'Un kit práctico y bonito que reúne productos de maquillaje y accesorios para el cabello, perfecto para llevar en el bolso y complementar tu rutina de belleza.',
+        150000,
+        '/images/kits/beauty-glow.svg',
+        JSON.stringify([10, 7, 6, 13, 16, 14])
+    );
+    console.log('Kits iniciales listos');
+}
+
 module.exports = db;
